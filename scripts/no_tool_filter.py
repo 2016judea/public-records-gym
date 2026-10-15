@@ -37,8 +37,9 @@ def main(path="answer_keys/candidates.jsonl"):
     with open(path, "w") as f:
         for t in tasks:
             f.write(json.dumps(t) + "\n")
-    solved = [t["id"] for t in tasks if t["no_tool_reward"] > 0]
-    print(f"no-tool: {len(solved)}/{len(tasks)} got any reward without tools: {solved}")
+    solved = [t["id"] for t in tasks if t["no_tool_reward"] >= t["grader"].get("pass_at", 1.0)]
+    partial = sum(0 < t["no_tool_reward"] < t["grader"].get("pass_at", 1.0) for t in tasks)
+    print(f"no-tool: {len(solved)}/{len(tasks)} passed without tools {solved}; {partial} earned partial reward")
 
 
 if __name__ == "__main__":

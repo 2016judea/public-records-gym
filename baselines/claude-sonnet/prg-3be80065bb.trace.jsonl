@@ -1,0 +1,3 @@
+{"t": 1792089689.8992078, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792089691.018775, "tool": "layer_notes", "args": {"layer": "sales"}, "error": null}
+{"t": 1792089695.08754, "tool": "query_layer", "args": {"layer": "sales", "where": "county='Hennepin'", "fields": null, "order_by": null, "limit": 5, "offset": 0, "count_only": false, "distinct": false}, "error": null}

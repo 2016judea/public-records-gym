@@ -1,4 +1,0 @@
-{"t": 1792083468.109094, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083471.351407, "tool": "query_layer", "args": {"layer": "food_inspections", "where": "business = 'CANTEEN AT TARGET DC'", "fields": ["business", "address", "lat", "lon"], "order_by": null, "limit": 1, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083474.270786, "tool": "query_near", "args": {"layer": "contamination", "lat": 44.99372, "lon": -93.21537, "radius_m": 5000.0, "where": "status = 'open' AND kind LIKE '%cleanup%'", "fields": ["site", "address", "status", "kind", "lat", "lon"], "limit": 1, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083477.372774, "tool": "query_near", "args": {"layer": "sales", "lat": 44.99351, "lon": -93.21478, "radius_m": 500.0, "where": "arms_length = true AND sale_month >= '2022-01'", "fields": ["parcel_id", "address", "price", "sale_month", "owner_type"], "limit": 100, "offset": 0, "count_only": false}, "error": null}

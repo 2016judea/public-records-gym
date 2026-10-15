@@ -23,68 +23,153 @@ def T(name, **a):
     return r
 
 
-def page(fn, **a):
-    """Pull every row of a paged tool call."""
-    out, off = [], 0
-    while True:
-        r = T(fn, offset=off, **a)
-        out += r["returned_rows"]
-        if not r["more"]:
-            return out
-        off += len(r["returned_rows"])
-
-
 def addr_city(prompt):
     m = re.search(r"metres of (.+?), (Minneapolis|Saint Paul|Bloomington|Edina|Roseville)", prompt)
     return m.group(1), m.group(2)
 
 
+SPELL = {"AVE": "Avenue", "ST": "Street", "BLVD": "Boulevard", "PKWY": "Parkway", "RD": "Road", "DR": "Drive",
+         "PL": "Place", "LN": "Lane", "CT": "Court", "N": "North", "S": "South", "E": "East", "W": "West"}
+
+
+def address_variants(addr):
+    """What an agent tries when geocode misses: drop the unit and city, re-space 'NE', spell words out."""
+    a = re.sub(r",.*$", "", addr.upper())
+    a = re.sub(r"\s*(#|\bSTE\b|\bSUITE\b|\bUNIT\b|\bAPT\b).*$", "", a).strip()
+    a = re.sub(r"\bAVENUE\b", "AVE", a)
+    out = [addr, a, re.sub(r"\b([NS])([EW])$", r"\1 \2", a)]
+    out.append(" ".join(SPELL.get(w, w.title() if not w[0].isdigit() else w.lower()) for w in a.split()))
+    return list(dict.fromkeys(out))
+
+
+def resolve_licence(biz, city):
+    lic = T("query_layer", layer="licences", where=f"business = '{biz}'", fields=["address", "city"])
+    addr = lic["rows"][0][0]
+    for v in address_variants(addr):
+        m = T("geocode", address=v, city=city)["matches"]
+        exact = [x for x in m if x["address"].upper() == v.upper()]
+        if len(exact) == 1:
+            return exact[0]
+        if len(m) == 1:
+            return m[0]
+    raise RuntimeError(f"unresolved {addr}")
+
+
+def rows(fn, **a):
+    """Pull every row of a paged tool call (2,000 per page)."""
+    out, off = [], 0
+    while True:
+        r = T(fn, offset=off, **a)
+        out += [dict(zip(r["fields"], x)) for x in r["rows"]]
+        if not r["more"]:
+            return out
+        off += len(r["rows"])
+
+
+def nearest_cleanup(lat, lon):
+    for radius in (500, 1500, 5000):
+        r = T("query_near", layer="contamination", lat=lat, lon=lon, radius_m=radius,
+              where="status='open' and kind like '%cleanup%'", fields=["site", "lat", "lon"], limit=1)
+        if r["rows"]:
+            return dict(zip(r["fields"], r["rows"][0]))
+
+
+MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+          "November", "December"]
+
+
+def month_window(w):
+    m = re.fullmatch(r"(\w+) (\d{4})", w)
+    if not m or m.group(1) not in MONTHS:
+        return None
+    mo, y = MONTHS.index(m.group(1)) + 1, int(m.group(2))
+    return f"{y}-{mo:02d}-01", f"{y + (mo == 12)}-{mo % 12 + 1:02d}-01"
+
+
 def solve(t):
     p, tpl = t["prompt"], t["template"]
-    if tpl == "sold_above_assessed":
-        a, c = addr_city(p)
-        g = T("geocode", address=a, city=c)["matches"][0]
-        rows = page("query_near", layer="sales", lat=g["lat"], lon=g["lon"], radius_m=600,
-                    where="sale_month >= '2023-01' and arms_length and price > assessed", fields=["parcel_id"])
-        return sorted({r["parcel_id"] for r in rows})
-    if tpl == "food_near_permit":
-        pno = re.search(r"permit (\S+) ", p).group(1)
-        pr = T("query_layer", layer="permits", where=f"permit_no = '{pno}'", fields=["lat", "lon"], limit=1)["returned_rows"][0]
-        rows = page("query_near", layer="food_inspections", lat=pr["lat"], lon=pr["lon"], radius_m=300,
-                    where="violation_priority='Priority1' and inspection_date between '2025-01-01' and '2025-12-31'",
-                    fields=["facility_id"])
-        return collections.Counter(r["facility_id"] for r in rows).most_common(1)[0][0]
-    if tpl == "code_cases_at_food_site":
+    if tpl == "sales_ratio_median":
+        county, start = re.search(r"sales in (\w+) County from (\w+ \d{4}) onward", p).groups()
+        a, _ = month_window(start)
+        T("layer_notes", layer="sales")  # multi_parcel_deed: the price is the whole deal's
+        rs = rows("query_layer", layer="sales", fields=["price", "assessed"],
+                  where=f"county = '{county}' and arms_length and assessed > 0 and sale_month >= '{a[:7]}' "
+                        f"and multi_parcel_deed is not true")  # null = not flagged
+        ratios = [r["price"] / r["assessed"] for r in rs]
+        return round(T("calc", expression=f"median({ratios})")["result"], 3)
+    if tpl == "messy_set":
+        out = []
+        for biz, city in re.findall(r'"(.+?)" \((Minneapolis|Saint Paul)\)', p):
+            out.append(resolve_licence(biz.replace("'", "''"), city)["parcel_id"])
+        return sorted(out)
+    if tpl == "licence_coverage":
+        typ = re.search(r"many '(.+?)' licences", p).group(1)
+        cities = re.search(r"these cities -- (.+?) -- how", p).group(1).split(", ")
+        T("layer_notes", layer="licences")  # the city registers stop at the Minneapolis and Saint Paul lines
+        covered = {r[0] for r in T("query_layer", layer="licences", fields=["city"], distinct=True)["rows"]}
+        out = {}
+        for c in cities:
+            if c in ("Minneapolis", "Saint Paul"):
+                out[c] = str(T("query_layer", layer="licences", where=f"city = '{c}' and type = '{typ}'", count_only=True)["total"])
+            else:
+                assert c not in covered
+                out[c] = "NOT_OBSERVED"
+        return out
+    if tpl == "fees_two_cities":
+        a, b = month_window(re.search(r"issued in (\w+ \d{4}),", p).group(1))
+        T("layer_notes", layer="permits")  # Minneapolis: fee repeats per parcel row; Saint Paul: no fee
+        win = f"issued >= DATE '{a}' and issued < DATE '{b}'"
+        stp = T("query_layer", layer="permits", where=f"city='Saint Paul' and {win} and fees_usd is not null", count_only=True)["total"]
+        assert stp == 0
+        rs = rows("query_layer", layer="permits", fields=["permit_no", "fees_usd"], distinct=True,
+                  where=f"city='Minneapolis' and {win}")
+        fees = [r["fees_usd"] for r in rs if r["fees_usd"] is not None]
+        return {"Minneapolis": T("calc", expression=f"sum({fees})")["result"], "Saint Paul": "NOT_OBSERVED"}
+    if tpl == "permits_compare":
+        T("layer_notes", layer="permits")  # Saint Paul ends 2025-06-30; Minneapolis is one row per parcel per permit
+        last = T("query_layer", layer="permits", where="city='Saint Paul'", fields=["issued"], order_by="issued desc", limit=1)["rows"][0][0]
+        out = {}
+        for w in re.search(r"these periods -- (.+?) -- which", p).group(1).split("; "):
+            win = month_window(w)
+            if not win or win[1] > last:
+                assert "2025" in w or "2026" in w
+                out[w] = "NOT_OBSERVED"
+                continue
+            n = {c: T("query_layer", layer="permits", fields=["permit_no"], distinct=True, count_only=True,
+                      where=f"city='{c}' and issued >= DATE '{win[0]}' and issued < DATE '{win[1]}'")["total"]
+                 for c in ("Minneapolis", "Saint Paul")}
+            out[w] = max(n, key=n.get)
+        return out
+    if tpl == "sale_history":
+        T("layer_notes", layer="sales")  # one row per parcel: the LAST sale of record only
+        out = {}
+        for item in re.search(r"these properties -- (.+?) -- what", p).group(1).split("; "):
+            addr, city = item.rsplit(", ", 1)
+            g = T("geocode", address=addr, city=city)["matches"][0]
+            par = T("parcel_lookup", parcel_id=g["parcel_id"], county=g["county"])["parcels"][0]
+            last = par["sales"][0] if par["sales"] else None
+            out[item] = str(last["price"]) if last and last["sale_month"] < "2019-01" else "NOT_OBSERVED"
+        return out
+    if tpl == "food_fail":
+        y, nb = re.search(r"In (\d{4}), in the Minneapolis neighborhood (.+?), how", p).groups()
+        nb = nb.replace("'", "''")
+        T("layer_notes", layer="food_inspections")  # one row per violation; no pass/fail published
+        n = T("query_layer", layer="food_inspections", fields=["inspection_id"], distinct=True, count_only=True,
+              where=f"neighborhood = '{nb}' and violation_priority = 'Priority1' and year(inspection_date) = {y}")["total"]
+        return {"priority1_inspections": n, "failed_inspections": "NOT_OBSERVED"}
+    if tpl == "chain":
         biz = re.search(r'"(.+?)"', p).group(1).replace("'", "''")
-        f = T("query_layer", layer="food_inspections", where=f"business = '{biz}'", fields=["parcel_id"], limit=1)["returned_rows"][0]
-        return T("query_layer", layer="code_inspections",
-                 where=f"parcel_id = '{f['parcel_id']}' and completed >= '2023-01-01'", count_only=True)["total"]
-    if tpl == "permits_near_contamination":
-        site = re.search(r'"(.+?)"', p).group(1).replace("'", "''")
-        s = T("query_layer", layer="contamination", where=f"site = '{site}'", fields=["lat", "lon"])["returned_rows"][0]
-        rows = page("query_near", layer="permits", lat=s["lat"], lon=s["lon"], radius_m=300,
-                    where="city='Saint Paul' and issued between DATE '2024-01-01' and DATE '2024-12-31'", fields=["permit_no"])
-        return len({r["permit_no"] for r in rows})
-    if tpl == "top_sale_near_cleanup":
-        biz = re.search(r'"(.+?)"', p).group(1).replace("'", "''")
-        f = T("query_layer", layer="food_inspections", where=f"business = '{biz}'", fields=["lat", "lon"], limit=1)["returned_rows"][0]
-        s = T("query_near", layer="contamination", lat=f["lat"], lon=f["lon"], radius_m=5000,
-              where="status='open' and kind like '%cleanup%'", fields=["site", "lat", "lon"], limit=1)["returned_rows"][0]
-        rows = page("query_near", layer="sales", lat=s["lat"], lon=s["lon"], radius_m=500,
-                    where="arms_length and sale_month >= '2022-01'", fields=["parcel_id", "price"])
-        return max(rows, key=lambda r: (r["price"], [-ord(ch) for ch in r["parcel_id"]]))["parcel_id"]
-    if tpl == "most_violation_parcel":
-        a = re.search(r"of (.+?), Minneapolis", p).group(1)
-        g = T("geocode", address=a, city="Minneapolis")["matches"][0]
-        rows = page("query_near", layer="code_inspections", lat=g["lat"], lon=g["lon"], radius_m=250,
-                    where="result='VS' and completed >= '2024-01-01' and parcel_id is not null", fields=["parcel_id"])
-        return collections.Counter(r["parcel_id"] for r in rows).most_common(1)[0][0]
-    if tpl == "median_ratio":
-        a, c = addr_city(p)
-        g = T("geocode", address=a, city=c)["matches"][0]
-        rows = page("query_near", layer="sales", lat=g["lat"], lon=g["lon"], radius_m=1000,
-                    where="arms_length and assessed > 0 and sale_month >= '2023-01'", fields=["price", "assessed"])
-        return round(statistics.median(r["price"] / r["assessed"] for r in rows), 3)
+        g = resolve_licence(biz, "Minneapolis")
+        s = nearest_cleanup(g["lat"], g["lon"])
+        rs = rows("query_near", layer="food_inspections", lat=s["lat"], lon=s["lon"], radius_m=400,
+                  where="violation_priority='Priority1' and inspection_date between '2025-01-01' and '2025-12-31'",
+                  fields=["facility_id", "violation_id"], distinct=True)
+        fid = collections.Counter(r["facility_id"] for r in rs).most_common(1)[0][0]
+        pid = T("query_layer", layer="food_inspections", where=f"facility_id = '{fid}'", fields=["parcel_id"],
+                distinct=True)["rows"][0][0]
+        T("layer_notes", layer="code_inspections")  # rows share an inspection id
+        return T("query_layer", layer="code_inspections", fields=["inspection_id"], distinct=True, count_only=True,
+                 where=f"parcel_id = '{pid}' and completed >= '2024-01-01'")["total"]
     raise ValueError(tpl)
 
 

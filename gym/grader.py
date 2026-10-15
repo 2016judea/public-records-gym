@@ -43,4 +43,26 @@ def grade(task_grader, answer, submitted):
         tol = max(task_grader.get("abs", 0), task_grader.get("rel", 0) * abs(float(answer)))
         r = float(abs(v - float(answer)) <= tol + 1e-9)
         return {"reward": r, "passed": r == 1.0}
+    if kind == "map_f1":
+        if isinstance(submitted, str):
+            m = re.search(r"\{.*\}", submitted, re.S)
+            try:
+                submitted = json.loads(m.group(0)) if m else {}
+            except ValueError:
+                submitted = {}
+        if not isinstance(submitted, dict):
+            return {"reward": 0.0, "passed": False}
+        # Keys match when one normalised key contains the other ("second half of 2025" vs
+        # "the second half of 2025 (July...)"): the grade is on the values, not on copying a label.
+        sub = {_norm(k): _norm(v) for k, v in submitted.items()}
+        tp = 0
+        for k, v in answer.items():
+            nk = _norm(k)
+            hit = sub.get(nk)
+            if hit is None:
+                cands = [sk for sk in sub if sk and (sk in nk or nk in sk)]
+                hit = sub[cands[0]] if len(cands) == 1 else None
+            tp += hit is not None and hit == _norm(v)
+        r = 0.0 if tp == 0 else 2 * tp / (len(answer) + len(sub))
+        return {"reward": round(r, 4), "passed": r >= task_grader.get("pass_at", 1.0)}
     raise ValueError(kind)

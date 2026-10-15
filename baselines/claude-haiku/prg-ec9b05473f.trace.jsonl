@@ -1,7 +1,0 @@
-{"t": 1792083485.3862789, "tool": "geocode", "args": {"address": "1501 27TH AVE N E", "city": "Minneapolis, MN"}, "error": null}
-{"t": 1792083485.467448, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083487.125958, "tool": "geocode", "args": {"address": "1501 27TH AVE NE Minneapolis", "city": null}, "error": null}
-{"t": 1792083488.698482, "tool": "query_layer", "args": {"layer": "parcels", "where": "address LIKE '%1501%27TH%' AND city = 'Minneapolis'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083491.545522, "tool": "query_near", "args": {"layer": "parcels", "lat": 45.01706, "lon": -93.23781, "radius_m": 600.0, "where": "true", "fields": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083494.762288, "tool": "query_layer", "args": {"layer": "sales", "where": "sale_month >= '2023-01' AND arms_length = true", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083499.3883562, "tool": "query_near", "args": {"layer": "sales", "lat": 45.01706, "lon": -93.23781, "radius_m": 600.0, "where": "sale_month >= '2023-01' AND arms_length = true", "fields": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}

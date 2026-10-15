@@ -1,4 +1,0 @@
-{"t": 1792083400.241768, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083401.492673, "tool": "query_layer", "args": {"layer": "contamination", "where": "site LIKE '%Snelling%'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083404.309665, "tool": "query_near", "args": {"layer": "permits", "lat": 44.93399, "lon": -93.16738, "radius_m": 300.0, "where": "city = 'Saint Paul' and issued >= DATE '2024-01-01' and issued <= DATE '2024-12-31'", "fields": ["permit_no", "issued"], "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083406.831651, "tool": "query_near", "args": {"layer": "permits", "lat": 44.93399, "lon": -93.16738, "radius_m": 300.0, "where": "city = 'Saint Paul' and issued >= DATE '2024-01-01' and issued <= DATE '2024-12-31'", "fields": null, "limit": 100, "offset": 0, "count_only": true}, "error": null}

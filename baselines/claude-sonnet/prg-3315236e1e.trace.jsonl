@@ -1,5 +1,0 @@
-{"t": 1792083400.3667, "tool": "geocode", "args": {"address": "1615 LAKE ST E", "city": "Minneapolis"}, "error": null}
-{"t": 1792083401.473556, "tool": "geocode", "args": {"address": "1615 LAKE ST E", "city": null}, "error": null}
-{"t": 1792083401.51694, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083403.472919, "tool": "query_layer", "args": {"layer": "food_inspections", "where": "business LIKE '%FIESTA MEXICANA%'", "fields": ["business", "address", "parcel_id"], "order_by": null, "limit": 5, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083405.076171, "tool": "query_layer", "args": {"layer": "code_inspections", "where": "parcel_id = '0402824210033' AND completed >= DATE '2023-01-01'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": true}, "error": null}

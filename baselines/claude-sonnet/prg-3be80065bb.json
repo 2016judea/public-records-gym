@@ -1,0 +1,17 @@
+{
+ "task_id": "prg-3be80065bb",
+ "model": "claude-sonnet",
+ "final_answer": null,
+ "tool_calls": 3,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "query_layer"
+ ],
+ "num_turns": 4,
+ "transcript_tail": "You've hit your session limit \u00b7 resets 3:50pm (America/Chicago)",
+ "reward": 0.0,
+ "passed": false,
+ "template": "sales_ratio_median",
+ "tier": 4
+}

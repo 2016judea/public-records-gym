@@ -1,8 +1,0 @@
-{
- "model": "claude-sonnet",
- "split": "train",
- "n": 5,
- "passed": 5,
- "pass_rate": 1.0,
- "mean_tool_calls": 4.0
-}

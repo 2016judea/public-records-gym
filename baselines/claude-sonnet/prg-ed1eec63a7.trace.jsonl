@@ -1,5 +1,0 @@
-{"t": 1792083375.3440168, "tool": "geocode", "args": {"address": "3205 CEDAR AVE S", "city": "Minneapolis"}, "error": null}
-{"t": 1792083375.381553, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083377.664212, "tool": "query_layer", "args": {"layer": "food_inspections", "where": "business = 'WONDER LEARNING CENTER'", "fields": ["business", "address", "parcel_id"], "order_by": null, "limit": 5, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083378.499891, "tool": "query_layer", "args": {"layer": "parcels", "where": "address = '3205 CEDAR AVE S'", "fields": ["parcel_id", "address", "city"], "order_by": null, "limit": 5, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083380.110713, "tool": "query_layer", "args": {"layer": "code_inspections", "where": "parcel_id = '0102824230058' and completed >= DATE '2023-01-01'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": true}, "error": null}

@@ -1,5 +1,5 @@
 """The harness as an MCP stdio server, so any MCP-speaking agent (Claude Code,
-an Agent SDK loop, a lab's own runner) can call the same five tools.
+an Agent SDK loop, a lab's own runner) can call the same seven tools.
 
 Every call is appended to $GYM_TRACE (jsonl) when set, which is the episode log.
 """
@@ -15,52 +15,66 @@ mcp = FastMCP("public-records-gym")
 TRACE = os.environ.get("GYM_TRACE")
 
 
-def _log(name, args, out):
+def _run(name, args):
+    out = tools.call(name, args)
     if TRACE:
         with open(TRACE, "a") as f:
             f.write(json.dumps({"t": time.time(), "tool": name, "args": args,
                                 "error": out.get("error") if isinstance(out, dict) else None}) + "\n")
-    return json.dumps(out, default=str)
+    return json.dumps(out, default=str, separators=(",", ":"))
 
 
 @mcp.tool()
 def list_layers() -> str:
-    """List the data layers, their fields, row counts and notes."""
-    return _log("list_layers", {}, tools.call("list_layers", {}))
+    """List the data layers, their fields and row counts."""
+    return _run("list_layers", {})
+
+
+@mcp.tool()
+def layer_notes(layer: str) -> str:
+    """The publisher's read-before-quoting caveats for a layer: coverage, what a row is, known traps."""
+    return _run("layer_notes", {"layer": layer})
 
 
 @mcp.tool()
 def query_layer(layer: str, where: str = "true", fields: list[str] | None = None, order_by: str | None = None,
-                limit: int = 100, offset: int = 0, count_only: bool = False) -> str:
+                limit: int = 2000, offset: int = 0, count_only: bool = False, distinct: bool = False) -> str:
     """ArcGIS-style query on one layer. `where` is a SQL boolean expression over the layer's fields
-    (e.g. "city = 'Saint Paul' and issued >= DATE '2024-01-01'"). At most 100 rows per call; page with
-    offset. count_only returns just the total. No GROUP BY: aggregate the rows yourself."""
-    a = dict(layer=layer, where=where, fields=fields, order_by=order_by, limit=limit, offset=offset, count_only=count_only)
-    return _log("query_layer", a, tools.call("query_layer", a))
+    (e.g. "city = 'Saint Paul' and issued >= DATE '2024-01-01'"). At most 2,000 rows per call; page
+    with offset while `more` is true. count_only returns the total. distinct returns distinct
+    combinations of `fields` (with count_only: how many). No GROUP BY or SUM: use calc."""
+    return _run("query_layer", dict(layer=layer, where=where, fields=fields, order_by=order_by, limit=limit,
+                                    offset=offset, count_only=count_only, distinct=distinct))
 
 
 @mcp.tool()
 def query_near(layer: str, lat: float, lon: float, radius_m: float, where: str = "true",
-               fields: list[str] | None = None, limit: int = 100, offset: int = 0, count_only: bool = False) -> str:
+               fields: list[str] | None = None, limit: int = 2000, offset: int = 0, count_only: bool = False,
+               distinct: bool = False) -> str:
     """Rows of a layer whose lat/lon are within radius_m metres (haversine) of a point, nearest first,
-    with distance_m. Optional `where` filter. At most 100 rows per call; page with offset."""
-    a = dict(layer=layer, lat=lat, lon=lon, radius_m=radius_m, where=where, fields=fields, limit=limit,
-             offset=offset, count_only=count_only)
-    return _log("query_near", a, tools.call("query_near", a))
+    with distance_m. Optional `where`. 2,000 rows per call; page with offset. distinct as query_layer."""
+    return _run("query_near", dict(layer=layer, lat=lat, lon=lon, radius_m=radius_m, where=where, fields=fields,
+                                   limit=limit, offset=offset, count_only=count_only, distinct=distinct))
 
 
 @mcp.tool()
 def geocode(address: str, city: str | None = None) -> str:
-    """Resolve a street address (and optional city) to parcel id(s) and lat/lon."""
-    a = dict(address=address, city=city)
-    return _log("geocode", a, tools.call("geocode", a))
+    """Resolve a street address to parcel(s) using the parcel file's own situs strings: exact match,
+    then prefix match. Unit numbers and spelled-out words will not match; normalise first."""
+    return _run("geocode", dict(address=address, city=city))
 
 
 @mcp.tool()
-def parcel_lookup(parcel_id: str) -> str:
-    """One parcel's record plus its recorded sales."""
-    a = dict(parcel_id=parcel_id)
-    return _log("parcel_lookup", a, tools.call("parcel_lookup", a))
+def parcel_lookup(parcel_id: str, county: str | None = None) -> str:
+    """Every parcel carrying this id, with its recorded sale. Ids are unique only within a county."""
+    return _run("parcel_lookup", dict(parcel_id=parcel_id, county=county))
+
+
+@mcp.tool()
+def calc(expression: str) -> str:
+    """Arithmetic over numbers and lists: + - * / ** and sum len min max median mean round sorted set.
+    Example: sum([120, 85, 85]) or median([1.1, 0.9, 1.3])."""
+    return _run("calc", dict(expression=expression))
 
 
 if __name__ == "__main__":

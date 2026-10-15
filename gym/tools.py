@@ -1,33 +1,38 @@
 """The tool surface the agent gets. Deterministic, read-only, over the frozen snapshot.
 
-Modelled on what a county ArcGIS REST layer offers: a `where` filter, chosen
-fields, ordering, a row cap with paging, a count-only mode, and a point+radius
-geometry filter. There is no GROUP BY: aggregation is the agent's job.
+Modelled on a county ArcGIS REST layer: a `where` filter, chosen fields, ordering,
+a 2,000-row cap per call (ArcGIS's default maxRecordCount) with paging, count-only
+and distinct-values modes, and a point+radius geometry filter. There is no GROUP BY
+and no SUM: aggregation is the agent's job, with `calc` for arithmetic.
 """
+import ast
+import json
+import math
 import os
 import re
+import statistics
 
 import duckdb
 
 DB = os.environ.get("GYM_DB", os.path.join(os.path.dirname(__file__), "..", "data", "snapshot.duckdb"))
-ROW_CAP = 100
+PARQUET = os.path.join(os.path.dirname(__file__), "..", "data", "snapshot")
+ROW_CAP = 2000
 LAYERS = ["parcels", "sales", "permits", "code_inspections", "food_inspections", "contamination", "licences"]
+NOTES = json.load(open(os.path.join(os.path.dirname(__file__), "layer_notes.json")))
 
-LAYER_NOTES = {
-    "parcels": "One row per tax parcel, 7 Twin Cities metro counties. assessed = total estimated market value (USD).",
-    "sales": "The assessor's LAST recorded sale per commercial/apartment/industrial parcel (one row per parcel, can be decades old). sale_month 'YYYY-MM'. assessed = today's assessed value, not the value at sale. arms_length false = not a market sale; multi_parcel_deed true = the price is the whole deal's.",
-    "permits": "Building permits, Minneapolis 2020-2026 and Saint Paul 2020-2025. issued is a DATE. value_usd is null for Minneapolis.",
-    "code_inspections": "City of Minneapolis housing/nuisance/fire code inspections 2016-2026. One row per inspection.",
-    "food_inspections": "City of Minneapolis food inspections 2023-2026. One row per VIOLATION (an inspection with no violation has one row with violation_priority null). inspection_date is 'YYYY-MM-DD'.",
-    "contamination": "Minnesota Pollution Control Agency sites (cleanup, tanks). lat/lon are the parcel centroid.",
-    "licences": "Business licences, Minneapolis + Saint Paul + state registers. lat/lon are the parcel centroid.",
+LAYER_SUMMARY = {
+    "parcels": "One row per tax parcel, 7 Twin Cities metro counties. assessed = county assessed value (USD).",
+    "sales": "The assessor's last recorded sale per commercial/apartment/industrial parcel. sale_month 'YYYY-MM'.",
+    "permits": "Building permits, Minneapolis and Saint Paul. issued is a DATE.",
+    "code_inspections": "City of Minneapolis housing/nuisance/fire code inspections.",
+    "food_inspections": "City of Minneapolis food inspections. inspection_date 'YYYY-MM-DD'.",
+    "contamination": "Minnesota Pollution Control Agency site files. lat/lon are the parcel centroid.",
+    "licences": "City and state business licence registers, address as written. No coordinates.",
 }
 
-_FORBIDDEN = re.compile(r";|--|/\*|\b(select|from|attach|copy|pragma|install|load|read_\w+|create|drop|insert|update|delete|alter|export|import|call)\b", re.I)
+_FORBIDDEN = re.compile(r";|--|/\*|\b(select|from|attach|copy|pragma|install|load|read_\w+|create|drop|insert|"
+                        r"update|delete|alter|export|import|call|query|glob)\b", re.I)
 _IDENT = re.compile(r"^[a-z_][a-z0-9_]*$")
-
-
-PARQUET = os.path.join(os.path.dirname(__file__), "..", "data", "snapshot")
 
 
 def _con():
@@ -42,13 +47,21 @@ def _con():
     return duckdb.connect(DB, read_only=True)
 
 
-def _hav(lat, lon):
-    # metres, haversine, R = 6371008.8 (IUGG mean). The answer keys use this same expression.
-    return (f"2*6371008.8*asin(sqrt(pow(sin(radians(lat-({lat}))/2),2)"
-            f"+cos(radians({lat}))*cos(radians(lat))*pow(sin(radians(lon-({lon}))/2),2)))")
+def haversine_sql(lat, lon, alias=None):
+    """Metres from a fixed point to <alias.>lat/lon. The answer keys use this same expression."""
+    a = f"{alias}." if alias else ""
+    return (f"2*6371008.8*asin(sqrt(pow(sin(radians({a}lat-({lat}))/2),2)"
+            f"+cos(radians({lat}))*cos(radians({a}lat))*pow(sin(radians({a}lon-({lon}))/2),2)))")
 
 
-HAVERSINE_SQL = _hav
+_COLS = {}
+
+
+def _columns(layer):
+    if layer not in _COLS:
+        with _con() as c:
+            _COLS[layer] = [r[0] for r in c.execute(f"describe {layer}").fetchall()]
+    return _COLS[layer]
 
 
 def _check(layer, where, fields, order_by):
@@ -63,125 +76,119 @@ def _check(layer, where, fields, order_by):
             raise ValueError(f"unknown field {f!r} on {layer}; fields are {cols}")
 
 
-_COLS = {}
+def _val(v):
+    return v.isoformat() if hasattr(v, "isoformat") else v
 
 
-def _columns(layer):
-    if layer not in _COLS:
-        with _con() as c:
-            _COLS[layer] = [r[0] for r in c.execute(f"describe {layer}").fetchall()]
-    return _COLS[layer]
-
-
-def _rows(cur):
+def _page(c, sel_sql, base_sql, order_sql, limit, offset, count_only, distinct, fields):
+    if distinct and not fields:
+        raise ValueError("distinct needs fields")
+    inner = f"select distinct {sel_sql} {base_sql}" if distinct else f"select {sel_sql} {base_sql}"
+    total = c.execute(f"select count(*) from ({inner})").fetchone()[0]
+    if count_only:
+        return {"total": total}
+    limit = max(1, min(int(limit), ROW_CAP))
+    order = order_sql or ("order by all" if distinct else "")
+    cur = c.execute(f"{inner} {order} limit {limit} offset {int(offset)}")
     names = [d[0] for d in cur.description]
-    out = []
-    for r in cur.fetchall():
-        out.append({n: (v.isoformat() if hasattr(v, "isoformat") else v) for n, v in zip(names, r)})
-    return out
+    rows = [[_val(v) for v in r] for r in cur.fetchall()]
+    return {"total": total, "offset": int(offset), "fields": names, "rows": rows,
+            "more": int(offset) + len(rows) < total}
 
 
 def list_layers():
     with _con() as c:
         return [{"layer": l, "rows": c.execute(f"select count(*) from {l}").fetchone()[0],
-                 "fields": _columns(l), "notes": LAYER_NOTES[l]} for l in LAYERS]
+                 "fields": _columns(l), "summary": LAYER_SUMMARY[l],
+                 "caveats": "call layer_notes before relying on this layer"} for l in LAYERS]
 
 
-def query_layer(layer, where="true", fields=None, order_by=None, limit=ROW_CAP, offset=0, count_only=False):
+def layer_notes(layer):
+    if layer not in LAYERS:
+        raise ValueError(f"unknown layer {layer!r}")
+    return {"layer": layer, "read_before_quoting": NOTES[layer]}
+
+
+def query_layer(layer, where="true", fields=None, order_by=None, limit=ROW_CAP, offset=0,
+                count_only=False, distinct=False):
     _check(layer, where, fields, order_by)
-    where = where or "true"
+    sel = ", ".join(fields) if fields else "*"
     with _con() as c:
-        total = c.execute(f"select count(*) from {layer} where {where}").fetchone()[0]
-        if count_only:
-            return {"total": total}
-        sel = ", ".join(fields) if fields else "*"
-        order = f" order by {order_by}" if order_by else ""
-        limit = max(1, min(int(limit), ROW_CAP))
-        cur = c.execute(f"select {sel} from {layer} where {where}{order} limit {limit} offset {int(offset)}")
-        return {"total": total, "offset": int(offset), "returned_rows": _rows(cur),
-                "more": int(offset) + limit < total}
+        return _page(c, sel, f"from {layer} where {where or 'true'}", f"order by {order_by}" if order_by else "",
+                     limit, offset, count_only, distinct, fields)
 
 
-def query_near(layer, lat, lon, radius_m, where="true", fields=None, limit=ROW_CAP, offset=0, count_only=False):
+def query_near(layer, lat, lon, radius_m, where="true", fields=None, limit=ROW_CAP, offset=0,
+               count_only=False, distinct=False):
     _check(layer, where, fields, None)
+    if "lat" not in _columns(layer):
+        raise ValueError(f"{layer} has no coordinates; resolve addresses with geocode")
     lat, lon, radius_m = float(lat), float(lon), float(radius_m)
     if radius_m > 5000:
         raise ValueError("radius_m is capped at 5000")
-    d = _hav(lat, lon)
+    d = haversine_sql(lat, lon)
     base = f"from {layer} where lat is not null and ({where or 'true'}) and {d} <= {radius_m}"
     with _con() as c:
-        total = c.execute(f"select count(*) {base}").fetchone()[0]
-        if count_only:
-            return {"total": total}
-        sel = ", ".join(fields) if fields else "*"
-        limit = max(1, min(int(limit), ROW_CAP))
-        cur = c.execute(f"select {sel}, round({d}, 1) as distance_m {base} order by {d}, 1 limit {limit} offset {int(offset)}")
-        return {"total": total, "offset": int(offset), "returned_rows": _rows(cur),
-                "more": int(offset) + limit < total}
+        if distinct:
+            return _page(c, ", ".join(fields), base, "", limit, offset, count_only, True, fields)
+        sel = (", ".join(fields) if fields else "*") + f", round({d}, 1) as distance_m"
+        return _page(c, sel, base, f"order by {d}, 1", limit, offset, count_only, False, fields)
 
 
 def geocode(address, city=None):
-    """Resolve a street address to parcel(s) and a coordinate."""
+    """Exact situs match first, then prefix. The parcel file's own address strings."""
     a = re.sub(r"\s+", " ", address.strip().upper())
+    sel = "select parcel_id, county, address, city, lat, lon from parcels where "
+    tail = (" and lower(city) = lower(?)" if city else "") + " order by county, parcel_id limit 10"
     with _con() as c:
-        q = "select parcel_id, address, city, county, lat, lon from parcels where upper(address) = ?"
-        args = [a]
-        if city:
-            q += " and lower(city) = lower(?)"
-            args.append(city)
-        cur = c.execute(q + " order by parcel_id limit 10", args)
-        rows = _rows(cur)
-        if not rows:
-            cur = c.execute("select parcel_id, address, city, county, lat, lon from parcels where upper(address) like ? "
-                            + ("and lower(city) = lower(?) " if city else "") + "order by parcel_id limit 10",
-                            [a + "%"] + ([city] if city else []))
-            rows = _rows(cur)
-        return {"matches": rows}
+        for op, arg in (("=", a), ("like", a + "%")):
+            cur = c.execute(sel + f"upper(address) {op} ?" + tail, [arg] + ([city] if city else []))
+            names = [d[0] for d in cur.description]
+            rows = [dict(zip(names, map(_val, r))) for r in cur.fetchall()]
+            if rows:
+                return {"matches": rows}
+        return {"matches": []}
 
 
-def parcel_lookup(parcel_id):
+def parcel_lookup(parcel_id, county=None):
+    """Every parcel with this id (ids are unique only within a county), plus each one's recorded sale."""
     with _con() as c:
-        p = _rows(c.execute("select * from parcels where parcel_id = ?", [parcel_id]))
-        s = _rows(c.execute("select sale_month, price, assessed, arms_length, owner, owner_type from sales "
-                            "where parcel_id = ? order by sale_month", [parcel_id]))
-        return {"parcel": p[0] if p else None, "sales": s}
+        q = "select * from parcels where parcel_id = ?" + (" and county = ?" if county else "")
+        cur = c.execute(q, [parcel_id] + ([county] if county else []))
+        names = [d[0] for d in cur.description]
+        out = []
+        for r in cur.fetchall():
+            p = dict(zip(names, map(_val, r)))
+            s = c.execute("select sale_month, price, assessed, arms_length, multi_parcel_deed from sales "
+                          "where parcel_id = ? and county = ?", [parcel_id, p["county"]]).fetchall()
+            p["sales"] = [dict(zip(["sale_month", "price", "assessed", "arms_length", "multi_parcel_deed"], x)) for x in s]
+            out.append(p)
+        return {"parcels": out}
 
 
-TOOLS = {
-    "list_layers": list_layers,
-    "query_layer": query_layer,
-    "query_near": query_near,
-    "geocode": geocode,
-    "parcel_lookup": parcel_lookup,
-}
+# ---- calc: arithmetic over numbers and lists, nothing else -------------------------------
+_FUNCS = {"sum": sum, "len": len, "min": min, "max": max, "abs": abs, "round": round, "sorted": sorted,
+          "median": statistics.median, "mean": statistics.mean, "sqrt": math.sqrt, "set": set}
+_NODES = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant, ast.List, ast.Tuple, ast.Call, ast.Name,
+          ast.Load, ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow, ast.USub, ast.UAdd,
+          ast.Compare, ast.Gt, ast.Lt, ast.GtE, ast.LtE, ast.Eq, ast.NotEq, ast.Subscript, ast.Slice)
 
-SCHEMAS = [
-    {"name": "list_layers", "description": "List the data layers, their fields, row counts and notes.",
-     "input_schema": {"type": "object", "properties": {}}},
-    {"name": "query_layer",
-     "description": "ArcGIS-style query on one layer. `where` is a SQL boolean expression over the layer's fields "
-                    "(e.g. \"city = 'Saint Paul' and issued >= DATE '2024-01-01'\"). Returns at most 100 rows per call; "
-                    "page with offset. count_only returns just the total. No GROUP BY.",
-     "input_schema": {"type": "object", "properties": {
-         "layer": {"type": "string"}, "where": {"type": "string"},
-         "fields": {"type": "array", "items": {"type": "string"}}, "order_by": {"type": "string"},
-         "limit": {"type": "integer"}, "offset": {"type": "integer"}, "count_only": {"type": "boolean"}},
-         "required": ["layer"]}},
-    {"name": "query_near",
-     "description": "Rows of a layer whose lat/lon lie within radius_m metres (haversine) of a point, nearest first, "
-                    "with distance_m. Optional `where` filter. 100 rows per call; page with offset.",
-     "input_schema": {"type": "object", "properties": {
-         "layer": {"type": "string"}, "lat": {"type": "number"}, "lon": {"type": "number"},
-         "radius_m": {"type": "number"}, "where": {"type": "string"},
-         "fields": {"type": "array", "items": {"type": "string"}}, "limit": {"type": "integer"},
-         "offset": {"type": "integer"}, "count_only": {"type": "boolean"}},
-         "required": ["layer", "lat", "lon", "radius_m"]}},
-    {"name": "geocode", "description": "Resolve a street address (and optional city) to parcel id(s) and lat/lon.",
-     "input_schema": {"type": "object", "properties": {"address": {"type": "string"}, "city": {"type": "string"}},
-                      "required": ["address"]}},
-    {"name": "parcel_lookup", "description": "One parcel's record plus its recorded sales.",
-     "input_schema": {"type": "object", "properties": {"parcel_id": {"type": "string"}}, "required": ["parcel_id"]}},
-]
+
+def calc(expression):
+    """Evaluate arithmetic: + - * / ** over numbers and lists, with sum len min max median mean round sorted set."""
+    if len(expression) > 200_000:
+        raise ValueError("expression too long")
+    tree = ast.parse(expression, mode="eval")
+    for n in ast.walk(tree):
+        if not isinstance(n, _NODES) or (isinstance(n, ast.Name) and n.id not in _FUNCS) or \
+                (isinstance(n, ast.Constant) and not isinstance(n.value, (int, float))):
+            raise ValueError(f"not allowed in calc: {type(n).__name__}")
+    v = eval(compile(tree, "<calc>", "eval"), {"__builtins__": {}}, dict(_FUNCS))
+    return {"result": sorted(v) if isinstance(v, set) else v}
+
+
+TOOLS = {"list_layers": list_layers, "layer_notes": layer_notes, "query_layer": query_layer,
+         "query_near": query_near, "geocode": geocode, "parcel_lookup": parcel_lookup, "calc": calc}
 
 
 def call(name, args):

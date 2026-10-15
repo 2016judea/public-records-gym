@@ -1,6 +1,7 @@
 """Pick the shipped 25 from the candidates, split train/test, separate the keys.
 
-Drops: any candidate with no_tool_reward > 0; a repeat of an answer already taken
+Drops: any candidate a model PASSES without tools (map tasks can earn partial
+reward from priors, e.g. abstaining everywhere; that is recorded, not disqualifying); a repeat of an answer already taken
 within the same template (diversity). Picks per template in md5 order, so the
 selection is reproducible. Test split is held out: its keys go to
 answer_keys/test.jsonl, which is never shipped with a sample.
@@ -9,12 +10,10 @@ import hashlib
 import json
 import os
 
-QUOTA = {"sold_above_assessed": 4, "food_near_permit": 4, "code_cases_at_food_site": 4,
-         "permits_near_contamination": 4, "top_sale_near_cleanup": 3, "most_violation_parcel": 3,
-         "median_ratio": 3}
-TEST_PER_TEMPLATE = {"sold_above_assessed": 2, "food_near_permit": 2, "code_cases_at_food_site": 1,
-                     "permits_near_contamination": 1, "top_sale_near_cleanup": 2, "most_violation_parcel": 1,
-                     "median_ratio": 1}  # 10 test / 15 train
+QUOTA = {"fees_two_cities": 5, "sales_ratio_median": 5, "chain": 4, "messy_set": 4, "permits_compare": 3,
+         "sale_history": 2, "licence_coverage": 2}
+TEST_PER_TEMPLATE = {"fees_two_cities": 2, "sales_ratio_median": 2, "chain": 2, "messy_set": 2, "permits_compare": 1,
+                     "sale_history": 1, "licence_coverage": 0}  # 10 test / 15 train; food_fail retired (both models 100%)
 PUBLIC = ["id", "prompt", "tier", "skills", "answer_type", "grader", "layers", "min_tool_calls", "snapshot"]
 
 
@@ -24,9 +23,9 @@ def main():
     picked, seen = [], set()
     for t in cands:
         key = (t["template"], json.dumps(t["answer"]))
-        if t["no_tool_reward"] > 0 or key in seen:
+        if t["no_tool_reward"] >= t["grader"].get("pass_at", 1.0) or key in seen:
             continue
-        if sum(p["template"] == t["template"] for p in picked) >= QUOTA[t["template"]]:
+        if sum(p["template"] == t["template"] for p in picked) >= QUOTA.get(t["template"], 0):
             continue
         seen.add(key)
         t["min_tool_calls"] = t.pop("reference_tool_calls")

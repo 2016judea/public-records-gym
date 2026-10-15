@@ -1,3 +1,0 @@
-{"t": 1792083374.703049, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083376.27771, "tool": "query_layer", "args": {"layer": "contamination", "where": "site LIKE '%Steiner%'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083378.681819, "tool": "query_near", "args": {"layer": "permits", "lat": 44.97113, "lon": -93.0446, "radius_m": 300.0, "where": "city = 'Saint Paul' and issued >= DATE '2024-01-01' and issued < DATE '2025-01-01'", "fields": ["permit_no", "issued"], "limit": 100, "offset": 0, "count_only": false}, "error": null}

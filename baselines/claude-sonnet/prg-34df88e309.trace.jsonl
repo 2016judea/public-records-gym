@@ -1,6 +1,0 @@
-{"t": 1792083410.3391418, "tool": "geocode", "args": {"address": "4225 3RD AVE S", "city": "Minneapolis, MN"}, "error": null}
-{"t": 1792083410.418537, "tool": "list_layers", "args": {}, "error": null}
-{"t": 1792083412.408747, "tool": "query_layer", "args": {"layer": "parcels", "where": "address = '4225 3RD AVE S'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
-{"t": 1792083412.8575811, "tool": "geocode", "args": {"address": "4225 3rd Avenue South", "city": "Minneapolis"}, "error": null}
-{"t": 1792083415.185599, "tool": "query_near", "args": {"layer": "parcels", "lat": 44.92595, "lon": -93.27145, "radius_m": 1000.0, "where": "true", "fields": ["parcel_id"], "limit": 100, "offset": 0, "count_only": true}, "error": null}
-{"t": 1792083418.586514, "tool": "query_near", "args": {"layer": "sales", "lat": 44.92595, "lon": -93.27145, "radius_m": 1000.0, "where": "arms_length = true and sale_month >= '2023-01'", "fields": ["parcel_id", "price", "assessed", "sale_month", "arms_length"], "limit": 100, "offset": 0, "count_only": false}, "error": null}

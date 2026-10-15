@@ -13,6 +13,7 @@ import sys
 
 from gym import grader
 
+INFRA = re.compile(r"session limit|rate limit|usage limit|overloaded|TIMEOUT after", re.I)
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MODEL = os.environ.get("GYM_MODEL", "sonnet")
 SYS = ("You are an analyst with tools over a frozen snapshot of Minnesota public records. Use the tools "
@@ -28,12 +29,15 @@ def run(task, outdir):
                                   "env": {"GYM_TRACE": trace, "PYTHONPATH": ROOT}}}}
     cfg_path = os.path.join(outdir, task["id"] + ".mcp.json")
     json.dump(cfg, open(cfg_path, "w"))
-    r = subprocess.run(["claude", "-p", "--model", MODEL, "--tools", "", "--strict-mcp-config", "--mcp-config", cfg_path,
+    try:
+        r = subprocess.run(["claude", "-p", "--model", MODEL, "--tools", "", "--strict-mcp-config", "--mcp-config", cfg_path,
                         "--allowedTools", "mcp__gym__list_layers,mcp__gym__query_layer,mcp__gym__query_near,"
-                                          "mcp__gym__geocode,mcp__gym__parcel_lookup",
-                        "--system-prompt", SYS, "--max-turns", "40", "--output-format", "json", task["prompt"]],
-                       capture_output=True, text=True, timeout=900, cwd="/private/tmp",
-                       env={**os.environ, "ENABLE_TOOL_SEARCH": "false"})
+                                          "mcp__gym__geocode,mcp__gym__parcel_lookup,mcp__gym__layer_notes,mcp__gym__calc",
+                        "--system-prompt", SYS, "--max-turns", "60", "--output-format", "json", task["prompt"]],
+                       capture_output=True, text=True, timeout=1500, cwd="/private/tmp",
+                       env={**os.environ, "ENABLE_TOOL_SEARCH": "false", "MAX_MCP_OUTPUT_TOKENS": "100000"})
+    except subprocess.TimeoutExpired:
+        r = subprocess.CompletedProcess([], 1, stdout="", stderr="TIMEOUT after 1500s")
     os.remove(cfg_path)
     try:
         res = json.loads(r.stdout)
@@ -61,20 +65,41 @@ def main(split="train", n="5"):
     chosen = order[: int(n)]
     outdir = os.path.join(ROOT, "baselines", f"claude-{MODEL}")
     os.makedirs(outdir, exist_ok=True)
-    with cf.ThreadPoolExecutor(5) as ex:
-        eps = list(ex.map(lambda t: run(t, outdir), chosen))
-    passed = 0
-    for t, ep in zip(chosen, eps):
-        g = grader.grade(t["grader"], keys[t["id"]]["answer"], ep["final_answer"])
-        ep.update(reward=g["reward"], passed=g["passed"], template=keys[t["id"]]["template"], tier=t["tier"])
-        passed += g["passed"]
-        json.dump(ep, open(os.path.join(outdir, t["id"] + ".json"), "w"), indent=1)
-        print(f"{t['id']} T{t['tier']} {ep['template']:28s} calls={ep['tool_calls']:3d} reward={g['reward']} "
+
+    # RESUMABLE: a graded episode on disk is kept; only missing or infra-failed ones rerun.
+    # A session/rate limit is not a wrong answer -- 2026-10-15 a limit hit mid-run scored
+    # 6 of 10 Sonnet tasks as failures with 0-3 tool calls. Those are retried, never graded.
+    def cached(t):
+        f = os.path.join(outdir, t["id"] + ".json")
+        if os.path.exists(f):
+            ep = json.load(open(f))
+            if not ep.get("infra_error") and "final_answer" in ep and not INFRA.search(ep.get("transcript_tail", "")):
+                return ep
+        return None
+
+    todo = [t for t in chosen if cached(t) is None]
+    print(f"{len(chosen) - len(todo)} cached, {len(todo)} to run", flush=True)
+    with cf.ThreadPoolExecutor(3) as ex:
+        for t, ep in zip(todo, ex.map(lambda t: run(t, outdir), todo)):
+            ep["infra_error"] = bool(INFRA.search(ep.get("transcript_tail", "")))
+            g = grader.grade(t["grader"], keys[t["id"]]["answer"], ep["final_answer"])
+            ep.update(reward=g["reward"], passed=g["passed"], template=keys[t["id"]]["template"], tier=t["tier"])
+            json.dump(ep, open(os.path.join(outdir, t["id"] + ".json"), "w"), indent=1)
+    eps = [cached(t) for t in chosen]
+    done = [(t, e) for t, e in zip(chosen, eps) if e is not None]
+    for t, ep in done:
+        print(f"{t['id']} T{t['tier']} {ep['template']:28s} calls={ep['tool_calls']:3d} reward={ep['reward']} "
               f"final={str(ep['final_answer'])[:50]}")
-    summary = {"model": f"claude-{MODEL}", "split": split, "n": len(chosen), "passed": passed,
-               "pass_rate": passed / len(chosen), "mean_tool_calls": sum(e["tool_calls"] for e in eps) / len(eps)}
+    missing = [t["id"] for t, e in zip(chosen, eps) if e is None]
+    passed = sum(e["passed"] for _, e in done)
+    summary = {"model": f"claude-{MODEL}", "split": split, "n": len(done), "passed": passed,
+               "pass_rate": round(passed / len(done), 3) if done else None,
+               "mean_tool_calls": round(sum(e["tool_calls"] for _, e in done) / len(done), 1) if done else None,
+               "not_run_infra_error": missing}
     json.dump(summary, open(os.path.join(outdir, f"summary_{split}.json"), "w"), indent=1)
     print(summary)
+    if missing:
+        sys.exit(f"{len(missing)} episodes hit an infra error (rate limit); rerun the same command to resume")
 
 
 if __name__ == "__main__":
