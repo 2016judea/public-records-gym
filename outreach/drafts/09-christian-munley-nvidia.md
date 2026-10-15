@@ -8,7 +8,7 @@ Your post calls NeMo Gym "an open source framework for building RL training envi
 
 Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Tools are deterministic within a snapshot and page at 100 rows, like real ArcGIS.
 
-Research use is free. Commercial training or evaluation needs a paid licence. Reply and I'll send the train split, the MCP harness and a baseline trace.
+Research use is free. Commercial training or evaluation is $500 a task, non-exclusive. Reply and I'll send the train split, the MCP harness and a baseline trace.
 
 Best,
 Aidan

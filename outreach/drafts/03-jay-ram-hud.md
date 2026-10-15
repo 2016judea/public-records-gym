@@ -6,7 +6,7 @@ Jay,
 
 You posted: "If you have unstructured data that you want to turn into an eval or RL environment, would love to chat." I did the turning already, on Minnesota public records.
 
-Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Research use is free. Commercial training or evaluation needs a paid licence. I'd like to list it on DataVendor as a HUD taskset. Reply and I'll send the train split, the MCP harness and a baseline trace.
+Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Research use is free. Commercial training or evaluation is $500 a task, non-exclusive. I'd like to list it on DataVendor as a HUD taskset. Reply and I'll send the train split, the MCP harness and a baseline trace.
 
 Best,
 Aidan

@@ -8,7 +8,7 @@ Your site says Bespoke focuses on "RL environment curation and data curation." I
 
 Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Sonnet without tools scores zero, so nothing is answerable from memory. With tools it has to plan the joins.
 
-Research use is free. Commercial training or evaluation needs a paid licence. Reply and I'll send the train split, the MCP harness and a baseline trace.
+Research use is free. Commercial training or evaluation is $500 a task, non-exclusive. Reply and I'll send the train split, the MCP harness and a baseline trace.
 
 Best,
 Aidan

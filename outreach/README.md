@@ -53,13 +53,17 @@ Pipe: Aidan's own Zoho mailbox, one message at a time, 90 s or more apart, at mo
 10 an hour and 25 a day (`distribution-channel` 5b/5c; `~/.claude/hooks/zoho_send_cap.py`
 enforces it). No Mailgun, because no batch for this product has shown clicks yet (rule 13).
 
+Order is by who pays (Aidan, 2026-10-15): vendors and labs first, academics last.
+Price: $500 a task, non-exclusive, for commercial training or evaluation; exclusive is quoted
+higher. Vendor/lab sends wait for the harder task round (round 1: Sonnet 10/10 with tools).
+
 | day | what goes out | count |
 |---|---|---|
-| 1 | the 10 emails in the top 15 (rows 1, 2, 5, 6, 7, 8, 10, 14, 15, plus Harsh Trivedi or Zafir Stojanovski as the 10th) | 10 email |
+| 1 | vendor + lab emails in the top 15 (rows 5, 6, 7, 8, 10) plus the next vendor/lab email rows up to 10 | 10 email |
 | 1 | the 5 LinkedIn/X touches in the top 15 (Jay Ram, Will Brown, Munley, Siddharth, Rane), by hand via `linkedin-message` | 5 DM |
-| 2 | the remaining 21 email rows, labs first, then academics | 21 email |
-| 3 | the remaining 18 LinkedIn/X rows | 18 DM |
-| 3 | day-3 read: replies in Zoho and LinkedIn. With no page, a reply is the only signal | — |
+| 2 | the remaining vendor + lab email rows | ≤25 email |
+| 3 | the remaining vendor + lab LinkedIn/X rows; day-3 read of replies | DM |
+| 4+ | academics last (rows 1, 2, 14, 15, then the rest): free research use, for citation | ≤25/day |
 | 8, 15 | touches 2 and 3 to the silent ones (rule 5: three touches before silence counts) | ≤25/day |
 
 The 5 marketplace/form rows (DataVendor, Prime Intellect bounty, HF OpenEnv,

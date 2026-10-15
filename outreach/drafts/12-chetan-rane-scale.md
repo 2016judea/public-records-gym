@@ -8,7 +8,7 @@ Scale's post says "nearly half of all of our new data training projects involve 
 
 Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Each key was re-derived through the agent's own tools before it shipped.
 
-Research use is free. Commercial training or evaluation needs a paid licence. Reply and I'll send the train split, the MCP harness and a baseline trace.
+Research use is free. Commercial training or evaluation is $500 a task, non-exclusive. Reply and I'll send the train split, the MCP harness and a baseline trace.
 
 Best,
 Aidan
