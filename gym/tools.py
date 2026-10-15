@@ -167,21 +167,36 @@ def parcel_lookup(parcel_id, county=None):
 
 
 # ---- calc: arithmetic over numbers and lists, nothing else -------------------------------
+def _ew(op):
+    def f(a, b):
+        if len(a) != len(b):
+            raise ValueError(f"lists differ in length: {len(a)} vs {len(b)}")
+        return [op(x, y) for x, y in zip(a, b)]
+    return f
+
+
 _FUNCS = {"sum": sum, "len": len, "min": min, "max": max, "abs": abs, "round": round, "sorted": sorted,
-          "median": statistics.median, "mean": statistics.mean, "sqrt": math.sqrt, "set": set}
+          "median": statistics.median, "mean": statistics.mean, "sqrt": math.sqrt, "set": set,
+          # elementwise over two equal-length lists, and set operations (results sorted)
+          "div": _ew(lambda x, y: x / y), "mul": _ew(lambda x, y: x * y),
+          "add": _ew(lambda x, y: x + y), "sub": _ew(lambda x, y: x - y),
+          "intersect": lambda a, b: sorted(set(a) & set(b)), "union": lambda a, b: sorted(set(a) | set(b)),
+          "minus": lambda a, b: sorted(set(a) - set(b)), "distinct": lambda a: sorted(set(a))}
 _NODES = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Constant, ast.List, ast.Tuple, ast.Call, ast.Name,
           ast.Load, ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow, ast.USub, ast.UAdd,
           ast.Compare, ast.Gt, ast.Lt, ast.GtE, ast.LtE, ast.Eq, ast.NotEq, ast.Subscript, ast.Slice)
+# constants may be numbers or strings (ids for the set operations)
 
 
 def calc(expression):
-    """Evaluate arithmetic: + - * / ** over numbers and lists, with sum len min max median mean round sorted set."""
+    """Evaluate arithmetic over numbers and lists: + - * / **, sum len min max median mean round sorted set,
+    elementwise div/mul/add/sub(list, list), and intersect/union/minus/distinct over lists of ids."""
     if len(expression) > 200_000:
         raise ValueError("expression too long")
     tree = ast.parse(expression, mode="eval")
     for n in ast.walk(tree):
         if not isinstance(n, _NODES) or (isinstance(n, ast.Name) and n.id not in _FUNCS) or \
-                (isinstance(n, ast.Constant) and not isinstance(n.value, (int, float))):
+                (isinstance(n, ast.Constant) and not isinstance(n.value, (int, float, str))):
             raise ValueError(f"not allowed in calc: {type(n).__name__}")
     v = eval(compile(tree, "<calc>", "eval"), {"__builtins__": {}}, dict(_FUNCS))
     return {"result": sorted(v) if isinstance(v, set) else v}

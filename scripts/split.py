@@ -10,10 +10,10 @@ import hashlib
 import json
 import os
 
-QUOTA = {"fees_two_cities": 5, "sales_ratio_median": 5, "chain": 4, "messy_set": 4, "permits_compare": 3,
-         "sale_history": 2, "licence_coverage": 2}
-TEST_PER_TEMPLATE = {"fees_two_cities": 2, "sales_ratio_median": 2, "chain": 2, "messy_set": 2, "permits_compare": 1,
-                     "sale_history": 1, "licence_coverage": 0}  # 10 test / 15 train; food_fail retired (both models 100%)
+QUOTA = {"fees_two_cities": 4, "sales_ratio_median": 3, "chain": 3, "ratio_parcels_assessed": 5,
+         "food_code_overlap": 5, "permits_30_days": 5}
+TEST_PER_TEMPLATE = {"fees_two_cities": 2, "sales_ratio_median": 1, "chain": 1, "ratio_parcels_assessed": 2,
+                     "food_code_overlap": 2, "permits_30_days": 2}  # 10 test / 15 train
 PUBLIC = ["id", "prompt", "tier", "skills", "answer_type", "grader", "layers", "min_tool_calls", "snapshot"]
 
 

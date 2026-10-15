@@ -72,8 +72,10 @@ def parcel_lookup(parcel_id: str, county: str | None = None) -> str:
 
 @mcp.tool()
 def calc(expression: str) -> str:
-    """Arithmetic over numbers and lists: + - * / ** and sum len min max median mean round sorted set.
-    Example: sum([120, 85, 85]) or median([1.1, 0.9, 1.3])."""
+    """Arithmetic over numbers and lists: + - * / ** and sum len min max median mean round sorted set;
+    elementwise div(a, b) mul add sub over two equal-length lists; intersect(a, b) union minus distinct
+    over lists of ids. Examples: sum([120, 85, 85]); median(div([500, 900], [450, 1000]));
+    len(intersect(["a", "b"], ["b", "c"]))."""
     return _run("calc", dict(expression=expression))
 
 

@@ -97,6 +97,38 @@ def solve(t):
                         f"and multi_parcel_deed is not true")  # null = not flagged
         ratios = [r["price"] / r["assessed"] for r in rs]
         return round(T("calc", expression=f"median({ratios})")["result"], 3)
+    if tpl == "ratio_parcels_assessed":
+        m = re.search(r"sales in (.+?) Count(?:y|ies)( from (\w+ \d{4}) onward)?", p)
+        counties = m.group(1).split(" and ")
+        cl = ",".join(f"'{c}'" for c in counties)
+        since = f" and sale_month >= '{month_window(m.group(3))[0][:7]}'" if m.group(3) else ""
+        sales = rows("query_layer", layer="sales", fields=["county", "parcel_id", "price"], order_by="county, parcel_id",
+                     where=f"county in ({cl}) and arms_length and multi_parcel_deed is not true{since}")
+        # the parcels layer's own assessed value, matched on county AND parcel id: Carver and Scott share
+        # 2,582 ids, so `parcel_id in (...)` alone pulls the other county's twin
+        keys_ = ",".join(sorted({f"'{r['county']}|{r['parcel_id']}'" for r in sales}))
+        par = rows("query_layer", layer="parcels", fields=["county", "parcel_id", "assessed"], order_by="county, parcel_id",
+                   where=f"county || '|' || parcel_id in ({keys_}) and assessed > 0")
+        ok = {(r["county"], r["parcel_id"]) for r in par}
+        sales = [r for r in sales if (r["county"], r["parcel_id"]) in ok]
+        assert [(r["county"], r["parcel_id"]) for r in sales] == [(r["county"], r["parcel_id"]) for r in par]
+        res = T("calc", expression=f"median(div({[r['price'] for r in sales]}, {[r['assessed'] for r in par]}))")
+        return round(res["result"], 3)
+    if tpl == "food_code_overlap":
+        y = re.search(r"dated in (\d{4})", p).group(1)
+        ct = re.search(r"case type '(\w+)'", p)
+        food = rows("query_layer", layer="food_inspections", fields=["parcel_id"], distinct=True,
+                    where=f"violation_priority='Priority1' and year(inspection_date)={y} and parcel_id is not null")
+        ids = ",".join(f"'{r['parcel_id']}'" for r in food)
+        cf_ = f" and case_type = '{ct.group(1)}'" if ct else ""
+        return T("query_layer", layer="code_inspections", fields=["parcel_id"], distinct=True, count_only=True,
+                 where=f"year(completed)={y}{cf_} and parcel_id in ({ids})")["total"]
+    if tpl == "permits_30_days":
+        kind, y = re.search(r"of kind '(.+?)' issued in (\d{4})", p).groups()
+        # completed before issued exists in the rows (no note says so): 'within 30 days of being issued' is 0..30
+        return T("query_layer", layer="permits", fields=["permit_no"], distinct=True, count_only=True,
+                 where=f"city='Saint Paul' and kind='{kind}' and year(issued)={y} "
+                       f"and datediff('day', issued, completed) between 0 and 30")["total"]
     if tpl == "messy_set":
         out = []
         for biz, city in re.findall(r'"(.+?)" \((Minneapolis|Saint Paul)\)', p):

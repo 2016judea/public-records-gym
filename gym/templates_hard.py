@@ -301,5 +301,86 @@ def t_chain(con):
     return out
 
 
-HARD_TEMPLATES = [t_sales_ratio_median, t_messy_set, t_licence_coverage, t_fees_two_cities, t_permits_compare, t_sale_history,
-                  t_food_fail, t_chain]
+# ---- round 3: traps that are true in the rows but written in no layer note -----------------
+
+def t_ratio_parcels_assessed(con):
+    """Two layers over 2,000 rows each. The sales layer carries its own `assessed` column, and on
+    333 rows it disagrees with the parcels layer's value (no note says so); the question asks for
+    the parcels layer's. Carver and Scott share 2,582 parcel ids, so a join without the county
+    double-matches 163 of their sales."""
+    out = []
+    windows = [(("Scott", "Carver"), None), (("Ramsey",), "2012-01"), (("Ramsey",), "2014-01"),
+               (("Ramsey",), "2015-01"), (("Hennepin",), "2018-01"), (("Hennepin",), "2020-01"),
+               (("Hennepin",), "2016-01"), (("Ramsey",), "2016-01")]
+    for counties, start in windows:
+        cl = ",".join(f"'{c}'" for c in counties)
+        since = f"and s.sale_month >= '{start}'" if start else ""
+        n, med_p, med_s = q(con, f"""select count(*), median(s.price * 1.0 / p.assessed), median(s.price * 1.0 / s.assessed)
+                                    from sales s join parcels p on p.parcel_id = s.parcel_id and p.county = s.county
+                                    where s.county in ({cl}) and s.arms_length and s.multi_parcel_deed is not true
+                                      and p.assessed > 0 {since}""")[0]
+        if not (2000 < n <= 5000) or abs(med_p - (med_s or 0)) < 0.0015:
+            continue
+        where = " and ".join(counties) + (" Counties" if len(counties) > 1 else " County")
+        when = f" from {mname(start)} onward" if start else ""
+        out.append(dict(template="ratio_parcels_assessed", tier=4,
+            skills=["two-layer-join", "paging", "arithmetic", "undocumented-trap"],
+            prompt=(f"For the arms-length recorded sales in {where}{when} whose recorded price is for that one "
+                    f"parcel alone (not a price shared across several parcels on one deed), divide each sale price "
+                    f"by the assessed value that the parcels layer records for that parcel. What is the median of "
+                    f"those ratios? Leave out sales whose parcel has no assessed value in the parcels layer. Answer "
+                    f"with a number rounded to 3 decimals." + SUFFIX),
+            answer_type="number", grader={"kind": "numeric_tol", "abs": 0.0006}, answer=round(med_p, 4),
+            layers=["sales", "parcels"], min_tool_calls=6,
+            intermediate={"sales": n, "median_using_sales_layer_assessed": round(med_s, 4)}))
+    return out
+
+
+def t_food_code_overlap(con):
+    """Two layers over 2,000 rows each: parcels with a Priority1 food violation AND a code inspection
+    in the same year. Some food rows carry no parcel id."""
+    out = []
+    for y in (2023, 2024, 2025):
+        for ct, label in ((None, "a code inspection"), ("FIS", "a code inspection of case type 'FIS'"),
+                          ("HIS", "a code inspection of case type 'HIS'"), ("Nuisance", "a code inspection of case type 'Nuisance'")):
+            rf = f"and case_type = '{ct}'" if ct else ""
+            n = q(con, f"""select count(*) from (
+                    select distinct parcel_id from food_inspections where violation_priority='Priority1'
+                      and year(inspection_date)={y} and parcel_id is not null
+                    intersect
+                    select distinct parcel_id from code_inspections where year(completed)={y} {rf})""")[0][0]
+            fr = q(con, f"select count(*) from food_inspections where violation_priority='Priority1' and year(inspection_date)={y}")[0][0]
+            cr = q(con, f"select count(*) from code_inspections where year(completed)={y} {rf}")[0][0]
+            if n >= 10 and cr > 2000:
+                out.append(dict(template="food_code_overlap", tier=4, skills=["two-layer-join", "paging", "set-ops"],
+                    prompt=(f"How many distinct tax parcels in Minneapolis had both at least one Priority1 food-code "
+                            f"violation on an inspection dated in {y} and {label} completed in {y}? Answer with a "
+                            f"number." + SUFFIX),
+                    answer_type="number", grader={"kind": "numeric_tol", "abs": 0}, answer=n,
+                    layers=["food_inspections", "code_inspections"], min_tool_calls=4,
+                    intermediate={"food_rows": fr, "code_rows": cr}))
+    return out
+
+
+def t_permits_30_days(con):
+    """Undocumented: 34 Saint Paul permits carry a completion date BEFORE their issue date. 'Completed
+    within 30 days of being issued' is 0-30 days; a plain `<= 30` also counts the negatives."""
+    out = []
+    for y in (2020, 2021, 2022, 2024):
+        for kind in ("Building Permit", "Electrical Permit", "Mechanical Permit",
+                     "Warm Air, Ventilation & General Sheet"):
+            good, naive = q(con, f"""select count(distinct permit_no) filter (where datediff('day', issued, completed) between 0 and 30),
+                                           count(distinct permit_no) filter (where datediff('day', issued, completed) <= 30)
+                                    from permits where city='Saint Paul' and year(issued)={y} and kind=?""", [kind])[0]
+            if naive != good:
+                out.append(dict(template="permits_30_days", tier=3, skills=["date-arithmetic", "undocumented-trap", "count"],
+                    prompt=(f"How many Saint Paul permits of kind '{kind}' issued in {y} were completed within 30 days "
+                            f"of being issued? Answer with a number." + SUFFIX),
+                    answer_type="number", grader={"kind": "numeric_tol", "abs": 0}, answer=good, layers=["permits"],
+                    min_tool_calls=2, intermediate={"count_with_negative_durations": naive}))
+    return out
+
+
+HARD_TEMPLATES = [t_fees_two_cities, t_sales_ratio_median, t_chain, t_ratio_parcels_assessed, t_food_code_overlap,
+                  t_permits_30_days]
+# retired in round 3 (Sonnet passed every instance): messy_set, permits_compare, sale_history, licence_coverage, food_fail
