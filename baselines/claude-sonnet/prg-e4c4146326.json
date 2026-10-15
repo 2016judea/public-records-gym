@@ -1,0 +1,18 @@
+{
+ "task_id": "prg-e4c4146326",
+ "model": "claude-sonnet",
+ "final_answer": "984",
+ "tool_calls": 3,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "query_layer"
+ ],
+ "num_turns": 4,
+ "transcript_tail": "984 permits.\n\nFINAL: 984",
+ "infra_error": false,
+ "reward": 0.0,
+ "passed": false,
+ "template": "permits_30_days",
+ "tier": 3
+}

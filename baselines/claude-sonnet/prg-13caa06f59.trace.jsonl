@@ -1,0 +1,3 @@
+{"t": 1792103203.209205, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792103203.391579, "tool": "layer_notes", "args": {"layer": "permits"}, "error": null}
+{"t": 1792103205.150209, "tool": "query_layer", "args": {"layer": "permits", "where": "city = 'Saint Paul' and kind = 'Electrical Permit' and issued >= DATE '2024-01-01' and issued <= DATE '2024-12-31' and completed is not null and completed <= issued + 30", "fields": null, "order_by": null, "limit": 2000, "offset": 0, "count_only": true, "distinct": false}, "error": null}

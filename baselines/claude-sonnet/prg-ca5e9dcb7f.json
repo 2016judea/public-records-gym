@@ -1,0 +1,21 @@
+{
+ "task_id": "prg-ca5e9dcb7f",
+ "model": "claude-sonnet",
+ "final_answer": "133",
+ "tool_calls": 6,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "layer_notes",
+  "query_layer",
+  "query_layer",
+  "query_layer"
+ ],
+ "num_turns": 7,
+ "transcript_tail": "**133** distinct parcels had both a Priority1 food-code violation on a 2024-dated inspection and a code_inspections visit completed in 2024.\n\nFINAL: 133",
+ "infra_error": false,
+ "reward": 1.0,
+ "passed": true,
+ "template": "food_code_overlap",
+ "tier": 4
+}

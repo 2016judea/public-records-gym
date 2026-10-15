@@ -1,0 +1,21 @@
+{
+ "task_id": "prg-993b94f149",
+ "model": "claude-sonnet",
+ "final_answer": "187",
+ "tool_calls": 6,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "layer_notes",
+  "query_layer",
+  "query_layer",
+  "query_layer"
+ ],
+ "num_turns": 7,
+ "transcript_tail": "187 distinct parcels.\n\nFINAL: 187",
+ "infra_error": false,
+ "reward": 1.0,
+ "passed": true,
+ "template": "food_code_overlap",
+ "tier": 4
+}

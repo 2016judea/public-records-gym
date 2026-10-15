@@ -1,0 +1,18 @@
+{
+ "task_id": "prg-13caa06f59",
+ "model": "claude-sonnet",
+ "final_answer": "2812",
+ "tool_calls": 3,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "query_layer"
+ ],
+ "num_turns": 4,
+ "transcript_tail": "2812\n\nFINAL: 2812",
+ "infra_error": false,
+ "reward": 0.0,
+ "passed": false,
+ "template": "permits_30_days",
+ "tier": 3
+}
