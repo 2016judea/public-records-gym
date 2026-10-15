@@ -1,0 +1,23 @@
+{
+ "task_id": "prg-cc70893944",
+ "model": "claude-haiku",
+ "final_answer": "{\n  \"2820 Euclid Avenue, Anoka\": 405000,\n  \"460 Prior Avenue North, Saint Paul\": 242900,\n  \"119 33RD ST W, Minneapolis\": \"NOT_OBSERVED\"\n}",
+ "tool_calls": 8,
+ "tools_used": [
+  "list_layers",
+  "geocode",
+  "geocode",
+  "geocode",
+  "parcel_lookup",
+  "parcel_lookup",
+  "parcel_lookup",
+  "query_layer"
+ ],
+ "num_turns": 9,
+ "transcript_tail": "FINAL: {\n  \"2820 Euclid Avenue, Anoka\": 405000,\n  \"460 Prior Avenue North, Saint Paul\": 242900,\n  \"119 33RD ST W, Minneapolis\": \"NOT_OBSERVED\"\n}",
+ "infra_error": false,
+ "reward": 1.0,
+ "passed": true,
+ "template": "sale_history",
+ "tier": 3
+}

@@ -1,0 +1,9 @@
+{
+ "model": "claude-haiku",
+ "split": "test",
+ "n": 10,
+ "passed": 5,
+ "pass_rate": 0.5,
+ "mean_tool_calls": 13.2,
+ "not_run_infra_error": []
+}

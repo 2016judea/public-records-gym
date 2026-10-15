@@ -1,0 +1,13 @@
+{"t": 1792101177.8219929, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792101181.583095, "tool": "query_layer", "args": {"layer": "licences", "where": "business IN ('Tony Jaros'' River Gardens', 'First Home Care, Inc', 'AAA METAL FINISHING 651- 228- 1418', 'RIVERLAKE CHILDCARE LLC', 'AMERICAN BANK OF ST. PAUL')", "fields": ["business", "type", "category", "address", "city"], "order_by": null, "limit": 2000, "offset": 0, "count_only": false, "distinct": false}, "error": null}
+{"t": 1792101183.922473, "tool": "geocode", "args": {"address": "2500 MARSHALL ST NE", "city": "Minneapolis"}, "error": null}
+{"t": 1792101184.326955, "tool": "geocode", "args": {"address": "3408 LAKE ST E #100", "city": "Minneapolis"}, "error": null}
+{"t": 1792101184.715311, "tool": "geocode", "args": {"address": "432 FRONT AVE", "city": "Saint Paul"}, "error": null}
+{"t": 1792101185.135691, "tool": "geocode", "args": {"address": "1990 SUBURBAN AVE # 2012", "city": "Saint Paul"}, "error": null}
+{"t": 1792101185.512289, "tool": "geocode", "args": {"address": "2310 7TH ST W", "city": "Saint Paul"}, "error": null}
+{"t": 1792101188.874243, "tool": "geocode", "args": {"address": "2500 MARSHALL STREET", "city": "Minneapolis"}, "error": null}
+{"t": 1792101189.2775528, "tool": "geocode", "args": {"address": "3408 LAKE STREET", "city": "Minneapolis"}, "error": null}
+{"t": 1792101189.672211, "tool": "geocode", "args": {"address": "1990 SUBURBAN AVE", "city": "Saint Paul"}, "error": null}
+{"t": 1792101190.0347662, "tool": "geocode", "args": {"address": "2310 7TH STREET", "city": "Saint Paul"}, "error": null}
+{"t": 1792101194.220602, "tool": "query_layer", "args": {"layer": "parcels", "where": "city = 'Minneapolis' AND address LIKE '2500 MARSHALL%'", "fields": ["parcel_id", "address", "city"], "order_by": null, "limit": 2000, "offset": 0, "count_only": false, "distinct": false}, "error": null}
+{"t": 1792101194.814398, "tool": "query_layer", "args": {"layer": "parcels", "where": "city = 'Minneapolis' AND address LIKE '3408 LAKE%'", "fields": ["parcel_id", "address", "city"], "order_by": null, "limit": 2000, "offset": 0, "count_only": false, "distinct": false}, "error": null}

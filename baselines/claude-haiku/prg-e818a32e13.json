@@ -1,0 +1,25 @@
+{
+ "task_id": "prg-e818a32e13",
+ "model": "claude-haiku",
+ "final_answer": "{\"Minneapolis\": 915502, \"Saint Paul\": \"NOT_OBSERVED\"}",
+ "tool_calls": 10,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "calc"
+ ],
+ "num_turns": 11,
+ "transcript_tail": "FINAL: {\"Minneapolis\": 915502, \"Saint Paul\": \"NOT_OBSERVED\"}",
+ "infra_error": false,
+ "reward": 0.5,
+ "passed": false,
+ "template": "fees_two_cities",
+ "tier": 4
+}

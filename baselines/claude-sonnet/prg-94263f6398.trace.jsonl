@@ -1,1 +1,11 @@
-{"t": 1792089691.749849, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792100029.529461, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792100030.7958028, "tool": "query_layer", "args": {"layer": "licences", "where": "business = 'GOLDEN BITE LLC'", "fields": null, "order_by": null, "limit": 2000, "offset": 0, "count_only": false, "distinct": false}, "error": null}
+{"t": 1792100031.141155, "tool": "layer_notes", "args": {"layer": "contamination"}, "error": null}
+{"t": 1792100031.3824902, "tool": "layer_notes", "args": {"layer": "licences"}, "error": null}
+{"t": 1792100032.534694, "tool": "geocode", "args": {"address": "2109 NICOLLET AVE", "city": "Minneapolis"}, "error": null}
+{"t": 1792100034.9419572, "tool": "query_near", "args": {"layer": "contamination", "lat": 44.96158, "lon": -93.27747, "radius_m": 5000.0, "where": "kind LIKE '%cleanup%' AND status = 'Open'", "fields": null, "limit": 5, "offset": 0, "count_only": false, "distinct": false}, "error": null}
+{"t": 1792100037.6165462, "tool": "query_layer", "args": {"layer": "contamination", "where": "true", "fields": ["status"], "order_by": null, "limit": 2000, "offset": 0, "count_only": false, "distinct": true}, "error": null}
+{"t": 1792100038.720472, "tool": "query_near", "args": {"layer": "contamination", "lat": 44.96158, "lon": -93.27747, "radius_m": 5000.0, "where": "kind LIKE '%cleanup%'", "fields": null, "limit": 10, "offset": 0, "count_only": false, "distinct": false}, "error": null}
+{"t": 1792100040.691493, "tool": "layer_notes", "args": {"layer": "food_inspections"}, "error": null}
+{"t": 1792100042.105723, "tool": "query_near", "args": {"layer": "food_inspections", "lat": 44.96229, "lon": -93.2771, "radius_m": 400.0, "where": "violation_priority = 'Priority1' AND inspection_date >= DATE '2025-01-01' AND inspection_date < DATE '2026-01-01'", "fields": null, "limit": 2000, "offset": 0, "count_only": false, "distinct": false}, "error": null}
+{"t": 1792100050.442223, "tool": "query_layer", "args": {"layer": "code_inspections", "where": "parcel_id = '2702924430019' AND completed >= DATE '2024-01-01'", "fields": null, "order_by": null, "limit": 2000, "offset": 0, "count_only": true, "distinct": false}, "error": null}

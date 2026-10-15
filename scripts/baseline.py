@@ -44,8 +44,8 @@ def run(task, outdir):
     except ValueError:
         res = {"result": r.stdout[-500:] + r.stderr[-500:]}
     text = res.get("result") or ""
-    m = re.findall(r"FINAL:\s*(.+)", text)
-    final = m[-1].strip().strip("`*") if m else None
+    # everything after the last FINAL:, so a JSON answer spread over lines is kept whole
+    final = text.rsplit("FINAL:", 1)[1].strip().strip("`*").strip() if "FINAL:" in text else None
     calls = [json.loads(l) for l in open(trace)] if os.path.exists(trace) else []
     return {"task_id": task["id"], "model": f"claude-{MODEL}", "final_answer": final, "tool_calls": len(calls),
             "tools_used": [c["tool"] for c in calls], "num_turns": res.get("num_turns"), "transcript_tail": text[-600:]}

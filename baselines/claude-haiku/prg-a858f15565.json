@@ -1,0 +1,25 @@
+{
+ "task_id": "prg-a858f15565",
+ "model": "claude-haiku",
+ "final_answer": "28",
+ "tool_calls": 10,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "geocode",
+  "query_layer",
+  "query_near",
+  "query_near",
+  "query_layer",
+  "query_layer",
+  "calc",
+  "query_layer"
+ ],
+ "num_turns": 11,
+ "transcript_tail": "FINAL: 28",
+ "infra_error": false,
+ "reward": 0.0,
+ "passed": false,
+ "template": "chain",
+ "tier": 4
+}

@@ -1,0 +1,8 @@
+{"t": 1792101232.894261, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792101235.188818, "tool": "geocode", "args": {"address": "2820 Euclid Avenue", "city": "Anoka"}, "error": null}
+{"t": 1792101235.638198, "tool": "geocode", "args": {"address": "460 Prior Avenue North", "city": "Saint Paul"}, "error": null}
+{"t": 1792101236.05433, "tool": "geocode", "args": {"address": "119 33RD ST W", "city": "Minneapolis"}, "error": null}
+{"t": 1792101238.496206, "tool": "parcel_lookup", "args": {"parcel_id": "013125220046", "county": "Anoka"}, "error": null}
+{"t": 1792101238.923133, "tool": "parcel_lookup", "args": {"parcel_id": "332923310109", "county": "Ramsey"}, "error": null}
+{"t": 1792101239.286548, "tool": "parcel_lookup", "args": {"parcel_id": "0302824240097", "county": "Hennepin"}, "error": null}
+{"t": 1792101243.620033, "tool": "query_layer", "args": {"layer": "sales", "where": "parcel_id = '0302824240097' and sale_month < '2019-01'", "fields": ["parcel_id", "address", "sale_month", "price"], "order_by": "sale_month desc", "limit": 10, "offset": 0, "count_only": false, "distinct": false}, "error": null}
