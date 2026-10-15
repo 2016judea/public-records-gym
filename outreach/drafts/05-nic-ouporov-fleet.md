@@ -1,6 +1,6 @@
 To: nic@fleet.so (work, published by Fleet)
 Subject: A training gym built on real city records
-Status: DRAFT, not sent
+Status: SCHEDULED in Zoho for Sat 10/17/2026 12:32–12:58 CT (sent from aidan@brickandmortar.dev)
 
 Nic,
 

@@ -1,6 +1,6 @@
 To: mahesh@smahesh.com (personal, his own site)
 Subject: An RL environment for Bespoke to curate
-Status: DRAFT, not sent
+Status: SCHEDULED in Zoho for Sat 10/17/2026 12:32–12:58 CT (sent from aidan@brickandmortar.dev)
 
 Mahesh,
 

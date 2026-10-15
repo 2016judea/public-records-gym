@@ -1,6 +1,6 @@
 To: t.scialom@gmail.com (personal, his GitHub profile; no work address found)
 Subject: A new domain for ARE
-Status: DRAFT, not sent
+Status: SCHEDULED in Zoho for Sat 10/17/2026 12:32–12:58 CT (sent from aidan@brickandmortar.dev)
 
 Thomas,
 

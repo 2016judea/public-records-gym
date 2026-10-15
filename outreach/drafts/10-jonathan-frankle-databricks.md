@@ -1,6 +1,6 @@
 To: jfrankle@databricks.com (work, published on jfrankle.com)
 Subject: RLVR over joined public records
-Status: DRAFT, not sent
+Status: SCHEDULED in Zoho for Sat 10/17/2026 12:32–12:58 CT (sent from aidan@brickandmortar.dev)
 
 Jonathan,
 
