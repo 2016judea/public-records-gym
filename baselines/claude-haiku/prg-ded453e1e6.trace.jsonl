@@ -1,0 +1,3 @@
+{"t": 1792083480.500121, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792083480.883682, "tool": "geocode", "args": {"address": "3926 FREMONT AVE N", "city": "Minneapolis"}, "error": null}
+{"t": 1792083484.061949, "tool": "query_near", "args": {"layer": "code_inspections", "lat": 45.02659, "lon": -93.29531, "radius_m": 250.0, "where": "result = 'VS' and completed >= DATE '2024-01-01'", "fields": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}

@@ -1,0 +1,20 @@
+{
+ "task_id": "prg-cb9e5468ed",
+ "model": "claude-haiku",
+ "final_answer": "2202924440129",
+ "tool_calls": 6,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_layer",
+  "query_near",
+  "query_near",
+  "query_near"
+ ],
+ "num_turns": 7,
+ "transcript_tail": "FINAL: 2202924440129",
+ "reward": 1.0,
+ "passed": true,
+ "template": "top_sale_near_cleanup",
+ "tier": 4
+}

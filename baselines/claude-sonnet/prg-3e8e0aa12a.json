@@ -1,0 +1,18 @@
+{
+ "task_id": "prg-3e8e0aa12a",
+ "model": "claude-sonnet",
+ "final_answer": "144",
+ "tool_calls": 4,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_near",
+  "query_near"
+ ],
+ "num_turns": 5,
+ "transcript_tail": "144\n\nFINAL: 144",
+ "reward": 1.0,
+ "passed": true,
+ "template": "permits_near_contamination",
+ "tier": 3
+}

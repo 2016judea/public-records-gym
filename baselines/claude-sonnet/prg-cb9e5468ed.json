@@ -1,0 +1,19 @@
+{
+ "task_id": "prg-cb9e5468ed",
+ "model": "claude-sonnet",
+ "final_answer": "2202924440129",
+ "tool_calls": 5,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_near",
+  "query_near",
+  "query_near"
+ ],
+ "num_turns": 6,
+ "transcript_tail": "Highest price: parcel **2202924440129** (365 Nicollet Mall) sold for $111,500,000 in 2025-07.\n\nFINAL: 2202924440129",
+ "reward": 1.0,
+ "passed": true,
+ "template": "top_sale_near_cleanup",
+ "tier": 4
+}

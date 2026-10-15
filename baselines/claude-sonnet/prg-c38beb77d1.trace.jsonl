@@ -1,0 +1,3 @@
+{"t": 1792083374.554344, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792083375.630883, "tool": "query_layer", "args": {"layer": "permits", "where": "permit_no = 'BLDG998607'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
+{"t": 1792083378.036559, "tool": "query_near", "args": {"layer": "food_inspections", "lat": 45.01236, "lon": -93.29649, "radius_m": 300.0, "where": "violation_priority = 'Priority1' and inspection_date >= '2025-01-01' and inspection_date <= '2025-12-31'", "fields": ["facility_id", "business", "inspection_date", "violation_priority"], "limit": 100, "offset": 0, "count_only": false}, "error": null}

@@ -1,0 +1,22 @@
+Public Records Gym — dual licence
+
+Copyright (c) 2026 Brick and Mortar
+
+Covers: the task set (tasks/), answer keys (answer_keys/), the harness and graders
+(gym/), the build scripts (scripts/) and the baseline episodes (baselines/).
+
+1. NON-COMMERCIAL RESEARCH — free.
+   Universities, non-profit research labs and individual researchers may use, copy and
+   modify these materials for non-commercial research and teaching, under the terms of
+   Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0),
+   https://creativecommons.org/licenses/by-nc/4.0/. Cite the work as shown in README.md.
+
+2. COMMERCIAL USE — paid licence.
+   Any use to train, fine-tune, evaluate or reinforce a model offered commercially, or
+   by or for a commercial entity, requires a separate written licence from Brick and
+   Mortar.
+
+The underlying records in data/snapshot/ are public data published by Minnesota
+counties, cities and state agencies under the Minnesota Government Data Practices Act.
+This licence does not restrict anyone from obtaining those records from their
+publishers.

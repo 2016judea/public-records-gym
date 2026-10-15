@@ -1,0 +1,6 @@
+{"t": 1792083468.011343, "tool": "geocode", "args": {"address": "1615 LAKE ST E", "city": "Minneapolis"}, "error": null}
+{"t": 1792083469.260892, "tool": "geocode", "args": {"address": "1615 Lake Street East Minneapolis", "city": null}, "error": null}
+{"t": 1792083470.466859, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792083473.364751, "tool": "query_layer", "args": {"layer": "parcels", "where": "city = 'Minneapolis' and address like '%1615%LAKE%'", "fields": ["parcel_id", "address", "city"], "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
+{"t": 1792083474.974347, "tool": "query_layer", "args": {"layer": "food_inspections", "where": "business like '%FIESTA%MEXICANA%'", "fields": ["parcel_id", "business", "address"], "order_by": null, "limit": 5, "offset": 0, "count_only": false}, "error": null}
+{"t": 1792083476.853316, "tool": "query_layer", "args": {"layer": "code_inspections", "where": "parcel_id = '0402824210033' and completed >= DATE '2023-01-01'", "fields": null, "order_by": null, "limit": 100, "offset": 0, "count_only": true}, "error": null}

@@ -1,0 +1,17 @@
+{
+ "task_id": "prg-c38beb77d1",
+ "model": "claude-sonnet",
+ "final_answer": "LIC36377",
+ "tool_calls": 3,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_near"
+ ],
+ "num_turns": 4,
+ "transcript_tail": "HMONG ACADEMY (facility_id LIC36377) has the most Priority1 violations in 2025 within 300m, with 5 recorded violations.\n\nFINAL: LIC36377",
+ "reward": 1.0,
+ "passed": true,
+ "template": "food_near_permit",
+ "tier": 3
+}

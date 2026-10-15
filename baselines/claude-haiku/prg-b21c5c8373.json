@@ -1,0 +1,17 @@
+{
+ "task_id": "prg-b21c5c8373",
+ "model": "claude-haiku",
+ "final_answer": "LIC406024",
+ "tool_calls": 3,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_near"
+ ],
+ "num_turns": 4,
+ "transcript_tail": "Counting by facility_id:\n- **LIC406024** (PEOPLE'S CHOYCE LLC): 5 violations\n- **LIC414326** (SWANK EATERY LLC): 1 violation  \n- **LIC427657** (THE BOUGIE WAFFLE): 1 violation\n\nFINAL: LIC406024",
+ "reward": 1.0,
+ "passed": true,
+ "template": "food_near_permit",
+ "tier": 3
+}

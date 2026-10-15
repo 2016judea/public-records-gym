@@ -1,0 +1,8 @@
+{
+ "model": "claude-sonnet",
+ "split": "test",
+ "n": 10,
+ "passed": 10,
+ "pass_rate": 1.0,
+ "mean_tool_calls": 5.0
+}

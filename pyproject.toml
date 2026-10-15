@@ -1,0 +1,9 @@
+[project]
+name = "public-records-gym"
+version = "0.1.0"
+description = "Verifiable tool-use RL tasks over joined Minnesota public records"
+requires-python = ">=3.11"
+dependencies = ["duckdb>=1.1", "mcp>=1.2,<2"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

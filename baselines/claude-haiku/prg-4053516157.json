@@ -1,0 +1,17 @@
+{
+ "task_id": "prg-4053516157",
+ "model": "claude-haiku",
+ "final_answer": "LIC419550",
+ "tool_calls": 3,
+ "tools_used": [
+  "list_layers",
+  "query_layer",
+  "query_near"
+ ],
+ "num_turns": 4,
+ "transcript_tail": "Based on the query results, I found 17 Priority1 food-code violations with inspection dates in 2025 within 300 meters of permit BLDG1092657 (located at 45.01097, -93.30915).\n\nCounting violations by facility_id:\n- **LIC419550** (Colonial Market - Restaurant): 10 violations\n- LIC419552 (Colonial Market - Meat Market): 2 violations  \n- LIC360677 (The Lowry Cafe - Restaurant): 5 violations\n\nFINAL: LIC419550",
+ "reward": 1.0,
+ "passed": true,
+ "template": "food_near_permit",
+ "tier": 3
+}

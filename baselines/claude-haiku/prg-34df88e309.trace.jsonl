@@ -1,0 +1,3 @@
+{"t": 1792083481.896344, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792083482.2979321, "tool": "geocode", "args": {"address": "4225 3RD AVE S", "city": "Minneapolis"}, "error": null}
+{"t": 1792083486.52416, "tool": "query_near", "args": {"layer": "sales", "lat": 44.92595, "lon": -93.27145, "radius_m": 1000.0, "where": "arms_length = true AND sale_month >= '2023-01'", "fields": ["price", "assessed", "sale_month", "address"], "limit": 100, "offset": 0, "count_only": false}, "error": null}

@@ -1,0 +1,21 @@
+{
+ "task_id": "prg-884c5a14df",
+ "model": "claude-sonnet",
+ "final_answer": "[\"2702924210009\",\"2702924210065\",\"2202924430082\",\"2702924110024\",\"2702924110025\",\"2702924140002\",\"2702924140069\",\"2702924110160\",\"2702924310186\"]",
+ "tool_calls": 7,
+ "tools_used": [
+  "geocode",
+  "list_layers",
+  "query_near",
+  "query_near",
+  "parcel_lookup",
+  "query_layer",
+  "query_layer"
+ ],
+ "num_turns": 8,
+ "transcript_tail": "53M, 2025-04)\n- 2702924140069 ($6.5M vs $3.8462M, 2024-09)\n- 2702924110160 ($6.5M vs $4.5538M, 2024-09)\n- 2702924310186 ($2M vs $1.1125M, 2026-02)\n\n(Excluded: parcel 2702924130219, sale price above $0 but assessed is null so can't compare; parcel 2202924430185 sold $23.5M below its $48.027M sale-time assessed value, even though current parcel-record assessed of $20.727M is lower \u2014 used the sale-time assessed since it's paired with that sale.)\n\nFINAL: [\"2702924210009\",\"2702924210065\",\"2202924430082\",\"2702924110024\",\"2702924110025\",\"2702924140002\",\"2702924140069\",\"2702924110160\",\"2702924310186\"]",
+ "reward": 1.0,
+ "passed": true,
+ "template": "sold_above_assessed",
+ "tier": 3
+}

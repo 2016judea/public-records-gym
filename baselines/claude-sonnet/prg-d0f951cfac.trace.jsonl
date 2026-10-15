@@ -1,0 +1,4 @@
+{"t": 1792083375.244299, "tool": "geocode", "args": {"address": "3949 4TH AVE S", "city": "Minneapolis"}, "error": null}
+{"t": 1792083375.3147898, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792083381.325309, "tool": "query_near", "args": {"layer": "sales", "lat": 44.93082, "lon": -93.26977, "radius_m": 600.0, "where": "arms_length = 1 and sale_month >= '2023-01'", "fields": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
+{"t": 1792083389.150309, "tool": "query_layer", "args": {"layer": "parcels", "where": "parcel_id in ('1002824110233','1102824220086','1002824140118','1002824110115','1002824120001','0202824330190','0202824330236')", "fields": ["parcel_id", "assessed", "lat", "lon"], "order_by": null, "limit": 100, "offset": 0, "count_only": false}, "error": null}
