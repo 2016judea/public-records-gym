@@ -1,6 +1,6 @@
 To: LinkedIn https://www.linkedin.com/in/chet2an (no verified email)
 Subject: A verified multi-step domain for Scale's catalogue
-Status: DRAFT, not sent
+Status: DRAFT, not sent: LinkedIn blocked 2026-10-16 (Premium lapsed, no InMail; 3 free personalized invites for the month used)
 
 Chetan,
 

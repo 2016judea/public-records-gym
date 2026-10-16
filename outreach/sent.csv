@@ -1,6 +1,10 @@
-person,org,to,subject,scheduled_ct,zoho_messageId
-Nicolai Ouporov,Fleet,nic@fleet.so,A training gym built on real city records,2026-10-17 12:32,1792101580081155300
-Sushant Mehta,Surge AI,sushantmehta@surgehq.ai,"EnterpriseBench's thesis, on public records",2026-10-17 12:39,1792101583293155000
-Mahesh Sathiamoorthy,Bespoke Labs,mahesh@smahesh.com,An RL environment for Bespoke to curate,2026-10-17 12:45,1792101586430138300
-Thomas Scialom,Meta,t.scialom@gmail.com,A new domain for ARE,2026-10-17 12:52,1792101589718138300
-Jonathan Frankle,Databricks,jfrankle@databricks.com,RLVR over joined public records,2026-10-17 12:58,1792101592854155000
+person,org,to,subject,scheduled_ct,zoho_messageId,channel
+Nicolai Ouporov,Fleet,nic@fleet.so,A training gym built on real city records,2026-10-17 12:32,1792101580081155300,
+Sushant Mehta,Surge AI,sushantmehta@surgehq.ai,"EnterpriseBench's thesis, on public records",2026-10-17 12:39,1792101583293155000,
+Mahesh Sathiamoorthy,Bespoke Labs,mahesh@smahesh.com,An RL environment for Bespoke to curate,2026-10-17 12:45,1792101586430138300,
+Thomas Scialom,Meta,t.scialom@gmail.com,A new domain for ARE,2026-10-17 12:52,1792101589718138300,
+Jonathan Frankle,Databricks,jfrankle@databricks.com,RLVR over joined public records,2026-10-17 12:58,1792101592854155000,
+Jay Ram,HUD,https://www.linkedin.com/in/jay-ram-29003b198,,2026-10-16 12:18,,linkedin-connect-note
+Christian Munley,NVIDIA,https://www.linkedin.com/in/christian-munley-873999235,,2026-10-16 12:19,,linkedin-connect-note
+Ross Taylor,General Reasoning,https://www.linkedin.com/in/rosstaylor90,,2026-10-16 12:20,,linkedin-connect-note
+Will Brown,Prime Intellect,https://form.typeform.com/to/jLfT7v7o,,2026-10-16 12:22,,form

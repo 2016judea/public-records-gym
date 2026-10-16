@@ -1,6 +1,6 @@
 To: LinkedIn https://www.linkedin.com/in/rosstaylor90 (no verified email)
 Subject: Beyond SWE: a city as the complex world
-Status: DRAFT, not sent
+Status: SENT 2026-10-16 12:20 CT, linkedin-connect-note (note-only: Premium lapsed so no InMail, free notes cap at 200 chars; send the full draft after he accepts)
 
 Ross,
 

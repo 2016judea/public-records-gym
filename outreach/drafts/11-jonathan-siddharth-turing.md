@@ -1,6 +1,6 @@
 To: LinkedIn https://www.linkedin.com/in/jonsid (no verified email)
 Subject: A production-like environment you don't have yet
-Status: DRAFT, not sent
+Status: DRAFT, not sent: LinkedIn blocked 2026-10-16 (Premium lapsed, no InMail; 3 free personalized invites for the month used)
 
 Jonathan,
 

@@ -1,6 +1,6 @@
 To: LinkedIn https://www.linkedin.com/in/jay-ram-29003b198 (also list on datavendor.ai)
 Subject: Public records, already turned into an RL environment
-Status: DRAFT, not sent
+Status: SENT 2026-10-16 12:18 CT, linkedin-connect-note (note-only: Premium lapsed so no InMail, free notes cap at 200 chars; send the full draft after he accepts)
 
 Jay,
 

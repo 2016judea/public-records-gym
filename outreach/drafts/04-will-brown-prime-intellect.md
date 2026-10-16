@@ -1,6 +1,6 @@
 To: LinkedIn (find profile) or Prime Intellect bounty form https://form.typeform.com/to/jLfT7v7o — Aidan has no X
 Subject: A verifiers environment over real county records
-Status: DRAFT, not sent
+Status: SENT 2026-10-16 12:22 CT, form (Prime Intellect bounty Typeform, full body; LinkedIn /in/willcb found but Message needs Premium)
 
 Will,
 

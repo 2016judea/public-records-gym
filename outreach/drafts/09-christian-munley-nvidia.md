@@ -1,6 +1,6 @@
 To: LinkedIn https://www.linkedin.com/in/christian-munley-873999235 (no verified email)
 Subject: A third-party environment for NeMo Gym
-Status: DRAFT, not sent
+Status: SENT 2026-10-16 12:19 CT, linkedin-connect-note (note-only: Premium lapsed so no InMail, free notes cap at 200 chars; send the full draft after he accepts)
 
 Christian,
 
