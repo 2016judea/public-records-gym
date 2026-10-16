@@ -6,7 +6,7 @@ Christian,
 
 Your post calls NeMo Gym "an open source framework for building RL training environments at scale." Scale needs domains. Here's one.
 
-Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Tools are deterministic within a snapshot and page at 100 rows, like real ArcGIS.
+Public Records Gym is a tool-use environment over seven joined Minnesota record layers: parcels, sales, permits, inspections, cleanup sites. Answers are computed by SQL and graded without a model. A test split is held back. Sonnet with the tools passes 4 of 10 held-out tasks; without them, none. Tools are deterministic within a snapshot and cap at 2,000 rows a call, like real ArcGIS.
 
 Research use is free. Commercial training or evaluation is $500 a task, non-exclusive. Reply and I'll send the train split, the MCP harness and a baseline trace.
 
