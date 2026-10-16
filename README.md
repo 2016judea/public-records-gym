@@ -128,6 +128,21 @@ uv run python -m scripts.baseline test 10         # claude -p through the MCP ha
 uv run --with pytest pytest -q
 ```
 
+### As a HUD environment + taskset (DataVendor)
+
+`env.py` serves the same seven tools as one MCP capability and grades with `gym/grader.py`;
+`hud_tasks.py` is the train split as a HUD taskset (rows carry the task id only, never a key).
+`Dockerfile.hud` + `.dockerignore` keep the test split, its keys and the task generators out of
+the image (`tests/test_hud_image.py` checks it against hud's own upload filter).
+
+```bash
+uv run python -m scripts.hud_smoke all        # 15 train tasks under the HUD SDK: replay agent 1.0, zero agent 0.0
+hud eval hud_tasks.py claude --all            # a real model (needs a provider key or HUD_API_KEY)
+HUD_API_KEY=... uv run python -m scripts.datavendor_list   # deploy, sync, import to DataVendor, price at $500
+```
+
+Listing copy for the web app: `datavendor/LISTING.md`.
+
 Rebuild from source (needs `~/Desktop/bricks`): `scripts/build_snapshot.py` →
 `gym/build_tasks.py` → `scripts/reference_solutions.py` → `scripts/no_tool_filter.py`
 → `scripts/split.py`. The held-out test keys live in `answer_keys/test.jsonl` and never

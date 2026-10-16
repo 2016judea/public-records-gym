@@ -1,0 +1,14 @@
+# The HUD environment image: `hud deploy` builds it remotely from this directory.
+# .dockerignore keeps the held-out test split, its keys and the outreach folder out.
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+
+WORKDIR /hud
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
+COPY . .
+# Materialise data/snapshot.duckdb from the parquet once, at build time, not on the first tool call.
+RUN uv run --frozen python -c "from gym import tools; tools._con().close()" && \
+    test ! -e answer_keys/test.jsonl && test ! -e tasks/test.jsonl && test ! -e answer_keys/candidates.jsonl
+
+EXPOSE 8765
+CMD ["uv", "run", "--frozen", "hud", "serve", "env.py", "--host", "0.0.0.0", "--port", "8765"]

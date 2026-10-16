@@ -1,0 +1,18 @@
+# Held-out split: prompts and keys never go into the image.
+tasks/test.jsonl
+answer_keys/test.jsonl
+# Every candidate's key (train + test + rejected), and the withheld register parcel ids.
+answer_keys/candidates.jsonl
+answer_keys/licence_sites.parquet
+# The task generators: with the snapshot they would regenerate every candidate, test keys included.
+gym/build_tasks.py
+gym/templates_hard.py
+# Not needed to serve or grade.
+outreach/
+baselines/
+scripts/
+tests/
+DATA_MODEL.md
+data/snapshot.duckdb
+*.mcp.json
+.hud/

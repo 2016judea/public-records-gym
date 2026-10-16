@@ -3,3 +3,4 @@ data/snapshot.duckdb
 __pycache__/
 .pytest_cache/
 *.mcp.json
+.hud/
