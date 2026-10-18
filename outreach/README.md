@@ -87,3 +87,10 @@ sign-up, so it's Aidan's call. The bounty form is the one most likely to pay qui
   and is unconfirmed. Harsh Trivedi is listed once, under lab (Ai2), with his Stony
   Brook address. There is no commercial price yet. The drafts say "paid licence", so
   have a number ready for the first reply that asks.
+
+## Public sample (2026-10-18)
+
+Two train tasks, keys, grader and the tool contract are public at
+https://github.com/2016judea/public-records-gym-sample as the work sample for contract
+applications (ledger: ~/Desktop/career/applications.csv). The test split, snapshot and
+templates stay here.
