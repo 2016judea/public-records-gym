@@ -1,9 +1,9 @@
 {
  "model": "claude-sonnet",
  "split": "test",
- "n": 10,
- "passed": 4,
- "pass_rate": 0.4,
- "mean_tool_calls": 42.1,
+ "n": 24,
+ "passed": 9,
+ "pass_rate": 0.375,
+ "mean_tool_calls": 28.3,
  "not_run_infra_error": []
 }

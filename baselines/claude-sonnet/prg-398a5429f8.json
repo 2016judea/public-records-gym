@@ -1,0 +1,31 @@
+{
+ "task_id": "prg-398a5429f8",
+ "model": "claude-sonnet",
+ "final_answer": "3232",
+ "tool_calls": 16,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "layer_notes",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer"
+ ],
+ "num_turns": 18,
+ "transcript_tail": "**3232**\n\nSampled rows confirm `sales.assessed` matches `parcels.assessed` exactly (including nulls), so the join reduces to filtering the sales layer itself: Hennepin + Ramsey, arms-length (bit0 set), not a multi-parcel deed (bit1 unset), sale_month \u2265 2015-01, assessed not null, price > assessed.\n\nFINAL: 3232",
+ "infra_error": false,
+ "reward": 0.0,
+ "passed": false,
+ "template": "sold_above_assessed_count",
+ "tier": 4
+}

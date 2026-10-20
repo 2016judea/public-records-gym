@@ -1,0 +1,28 @@
+{
+ "task_id": "prg-1934d44ec3",
+ "model": "claude-sonnet",
+ "final_answer": "135",
+ "tool_calls": 13,
+ "tools_used": [
+  "list_layers",
+  "layer_notes",
+  "layer_notes",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "query_layer",
+  "calc",
+  "query_layer"
+ ],
+ "num_turns": 14,
+ "transcript_tail": "135 distinct Minneapolis tax parcels had both a Priority2 food-code violation on a 2024-dated inspection and a code-enforcement inspection completed in 2024.\n\nFINAL: 135",
+ "infra_error": false,
+ "reward": 1.0,
+ "passed": true,
+ "template": "food_code_overlap",
+ "tier": 4
+}

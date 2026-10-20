@@ -1,0 +1,4 @@
+{"t": 1792533322.7148669, "tool": "list_layers", "args": {}, "error": null}
+{"t": 1792533322.9045608, "tool": "layer_notes", "args": {"layer": "permits"}, "error": null}
+{"t": 1792533325.949725, "tool": "query_layer", "args": {"layer": "permits", "where": "city = 'Saint Paul' and kind = 'Building Permit' and issued >= DATE '2024-07-01' and issued <= DATE '2024-09-30' and completed is not null and completed - issued <= 30", "fields": null, "order_by": null, "limit": 2000, "offset": 0, "count_only": true, "distinct": false}, "error": null}
+{"t": 1792533326.792373, "tool": "query_layer", "args": {"layer": "permits", "where": "city = 'Saint Paul' and kind = 'Building Permit' and issued >= DATE '2024-07-01' and issued <= DATE '2024-09-30'", "fields": null, "order_by": null, "limit": 2000, "offset": 0, "count_only": true, "distinct": false}, "error": null}

@@ -18,7 +18,7 @@ configs:
 
 # Public Records Gym
 
-**Internal. Not deployed, not published.** Sample build, round 3, 2026-10-15.
+**Private repo.** Round 4, 2026-10-20. Listed on HUD DataVendor (174 train tasks, $500 each); Prime Intellect build in `scripts/build_prime_env.py`.
 
 A tool-use RL environment. An agent answers questions about Minnesota land,
 buildings and businesses by querying seven joined public-record layers through an
@@ -29,10 +29,10 @@ without a model. The tasks are built around the ways the obvious query is wrong.
 
 | | |
 |---|---|
-| Tasks | **25** (15 train, 10 held-out test), 6 templates |
-| Baseline, held-out test, with tools | **claude-sonnet: 4/10 (40%)**, inside the 20-60% target. Round 2 set: Sonnet 9/10, Haiku 5/10 |
-| Without tools | claude-sonnet passes **0 of 51** candidates |
-| Answer keys | computed by SQL, then re-derived through the agent's own tools: **51/51** candidates reproduced |
+| Tasks | **227** (174 train, 53 held-out test), 7 templates |
+| Baseline, held-out test, with tools | **claude-sonnet: 9/24 (37.5%)**, mean 28 tool calls; 5/14 on round-4 tasks alone. Round 3: 4/10 |
+| Without tools | claude-sonnet passes **0 of 228** round-4 candidates |
+| Answer keys | computed by SQL, then re-derived through the agent's own tools: **228/228** candidates reproduced |
 | Tool calls per solve | 4-16 minimum (reference trajectory); chains need 8+ |
 | Grader | deterministic: `exact`, `set_f1`, `map_f1` (each part of a multi-part answer scored), `numeric_tol`; pass = reward 1.0 |
 | Harness | 7 tools over MCP stdio (`gym/mcp_server.py`) or plain Python (`gym/tools.py`) |
