@@ -250,9 +250,6 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["{pkg}"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"{pkg}/data" = "{pkg}/data"
-"{pkg}/core/layer_notes.json" = "{pkg}/core/layer_notes.json"
 ''')
     size = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(dst) for f in fs)
     print(f"{name}: {len(tasks)} tasks, {size / 1e6:.1f} MB -> {dst}")
