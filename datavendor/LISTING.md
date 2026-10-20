@@ -7,7 +7,7 @@ there if they change, never type one from memory. Limits: docs.datavendor.ai/sel
 Live state (2026-10-20): vendor org "Brick and Mortar AI" (legal entity Brick and Mortar AI LLC),
 Tier 1, Mutual NDA accepted. HUD environment `public-records-gym` built (build 884611fb), taskset
 `public-records-gym-train` (174 tasks) synced and imported to Inventory, each task priced $500 and
-tagged. One draft listing holds all 174 ($87,000 list). Tier 2 (buyer requests) needs the Platform
+tagged. One listing holds all 174 ($87,000 list): passed the mandatory check (secrets clean, 100) and went LIVE in the public catalog 10/20 (datavendor.ai/listings/95ade363-a6b3-42ed-b85a-64544acb0394). Tier 2 (buyer requests) needs the Platform
 Access Agreement: NOT signed, see `PAA-unsigned-2026-10-20.pdf` and the memory file for why.
 
 ## Title (60 max)
