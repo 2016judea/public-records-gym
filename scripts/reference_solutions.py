@@ -78,7 +78,23 @@ MONTHS = ["January", "February", "March", "April", "May", "June", "July", "Augus
           "November", "December"]
 
 
+QWORDS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
+
+
+def quarter_window(w):
+    m = re.match(r"(?:the )?(first|second|third|fourth) quarter of (\d{4})", w)
+    if not m:
+        return None
+    qt, y = QWORDS[m.group(1)], int(m.group(2))
+    a = f"{y}-{3 * qt - 2:02d}-01"
+    b = f"{y + (qt == 4)}-{(3 * qt) % 12 + 1:02d}-01"
+    return a, b
+
+
 def month_window(w):
+    qw = quarter_window(w)
+    if qw:
+        return qw
     m = re.fullmatch(r"(\w+) (\d{4})", w)
     if not m or m.group(1) not in MONTHS:
         return None
@@ -97,6 +113,21 @@ def solve(t):
                         f"and multi_parcel_deed is not true")  # null = not flagged
         ratios = [r["price"] / r["assessed"] for r in rs]
         return round(T("calc", expression=f"median({ratios})")["result"], 3)
+    if tpl == "sold_above_assessed_count":
+        m = re.search(r"sales in (.+?) Count(?:y|ies)( from (\w+ \d{4}) onward)?", p)
+        counties = m.group(1).split(" and ")
+        cl = ",".join(f"'{c}'" for c in counties)
+        since = f" and sale_month >= '{month_window(m.group(3))[0][:7]}'" if m.group(3) else ""
+        sales = rows("query_layer", layer="sales", fields=["county", "parcel_id", "price"], order_by="county, parcel_id",
+                     where=f"county in ({cl}) and arms_length and multi_parcel_deed is not true{since}")
+        keys_ = ",".join(sorted({f"'{r['county']}|{r['parcel_id']}'" for r in sales}))
+        par = rows("query_layer", layer="parcels", fields=["county", "parcel_id", "assessed"], order_by="county, parcel_id",
+                   where=f"county || '|' || parcel_id in ({keys_}) and assessed > 0")
+        av = {(r["county"], r["parcel_id"]): r["assessed"] for r in par}
+        prices = [r["price"] for r in sales if (r["county"], r["parcel_id"]) in av]
+        assessed = [av[(r["county"], r["parcel_id"])] for r in sales if (r["county"], r["parcel_id"]) in av]
+        diff = T("calc", expression=f"sub({prices}, {assessed})")["result"]
+        return sum(1 for d in diff if d > 0)
     if tpl == "ratio_parcels_assessed":
         m = re.search(r"sales in (.+?) Count(?:y|ies)( from (\w+ \d{4}) onward)?", p)
         counties = m.group(1).split(" and ")
@@ -117,18 +148,21 @@ def solve(t):
     if tpl == "food_code_overlap":
         y = re.search(r"dated in (\d{4})", p).group(1)
         ct = re.search(r"case type '(\w+)'", p)
+        prio = re.search(r"least one (Priority\d)", p).group(1)
         food = rows("query_layer", layer="food_inspections", fields=["parcel_id"], distinct=True,
-                    where=f"violation_priority='Priority1' and year(inspection_date)={y} and parcel_id is not null")
+                    where=f"violation_priority='{prio}' and year(inspection_date)={y} and parcel_id is not null")
         ids = ",".join(f"'{r['parcel_id']}'" for r in food)
         cf_ = f" and case_type = '{ct.group(1)}'" if ct else ""
         return T("query_layer", layer="code_inspections", fields=["parcel_id"], distinct=True, count_only=True,
                  where=f"year(completed)={y}{cf_} and parcel_id in ({ids})")["total"]
     if tpl == "permits_30_days":
-        kind, y = re.search(r"of kind '(.+?)' issued in (\d{4})", p).groups()
-        # completed before issued exists in the rows (no note says so): 'within 30 days of being issued' is 0..30
+        kind, when, days = re.search(r"of kind '(.+?)' issued in (.+?) were completed within (\d+) days", p).groups()
+        qw = quarter_window(when)
+        win = (f"issued >= DATE '{qw[0]}' and issued < DATE '{qw[1]}'" if qw else f"year(issued)={when}")
+        # completed before issued exists in the rows (no note says so): 'within N days of being issued' is 0..N
         return T("query_layer", layer="permits", fields=["permit_no"], distinct=True, count_only=True,
-                 where=f"city='Saint Paul' and kind='{kind}' and year(issued)={y} "
-                       f"and datediff('day', issued, completed) between 0 and 30")["total"]
+                 where=f"city='Saint Paul' and kind='{kind.replace(chr(39), chr(39) * 2)}' and {win} "
+                       f"and datediff('day', issued, completed) between 0 and {days}")["total"]
     if tpl == "messy_set":
         out = []
         for biz, city in re.findall(r'"(.+?)" \((Minneapolis|Saint Paul)\)', p):
@@ -148,7 +182,7 @@ def solve(t):
                 out[c] = "NOT_OBSERVED"
         return out
     if tpl == "fees_two_cities":
-        a, b = month_window(re.search(r"issued in (\w+ \d{4}),", p).group(1))
+        a, b = month_window(re.search(r"issued in (?:the )?(.+?), for Minneapolis", p).group(1))
         T("layer_notes", layer="permits")  # Minneapolis: fee repeats per parcel row; Saint Paul: no fee
         win = f"issued >= DATE '{a}' and issued < DATE '{b}'"
         stp = T("query_layer", layer="permits", where=f"city='Saint Paul' and {win} and fees_usd is not null", count_only=True)["total"]
@@ -193,7 +227,9 @@ def solve(t):
         biz = re.search(r'"(.+?)"', p).group(1).replace("'", "''")
         g = resolve_licence(biz, "Minneapolis")
         s = nearest_cleanup(g["lat"], g["lon"])
-        rs = rows("query_near", layer="food_inspections", lat=s["lat"], lon=s["lon"], radius_m=400,
+        radius = int(re.search(r"Within (\d+) metres", p).group(1))
+        since = re.search(r"on or after (\d{4}-\d{2}-\d{2})", p).group(1)
+        rs = rows("query_near", layer="food_inspections", lat=s["lat"], lon=s["lon"], radius_m=radius,
                   where="violation_priority='Priority1' and inspection_date between '2025-01-01' and '2025-12-31'",
                   fields=["facility_id", "violation_id"], distinct=True)
         fid = collections.Counter(r["facility_id"] for r in rs).most_common(1)[0][0]
@@ -201,7 +237,7 @@ def solve(t):
                 distinct=True)["rows"][0][0]
         T("layer_notes", layer="code_inspections")  # rows share an inspection id
         return T("query_layer", layer="code_inspections", fields=["inspection_id"], distinct=True, count_only=True,
-                 where=f"parcel_id = '{pid}' and completed >= '2024-01-01'")["total"]
+                 where=f"parcel_id = '{pid}' and completed >= '{since}'")["total"]
     raise ValueError(tpl)
 
 

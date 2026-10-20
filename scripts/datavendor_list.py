@@ -2,7 +2,7 @@
 
 Needs HUD_API_KEY (one key covers hud.ai and api.datavendor.ai). Steps:
   1. hud deploy                       builds Dockerfile.hud remotely (test split excluded by .dockerignore)
-  2. hud sync tasks <name> hud_tasks.py   the 15 train rows (task id only, no answers)
+  2. hud sync tasks <name> hud_tasks.py   the train rows (task id only, no answers)
   3. POST /v2/tasks/import            one inventory asset per task, task_type general
   4. PATCH /v2/tasks/{asset}          description, domain and the $500 asking price on each
 
@@ -23,7 +23,8 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 TASKSET = "public-records-gym-train"
 API = "https://api.datavendor.ai/v2"
 PRICE_USD = 500
-DOMAIN_WANT = ("public", "government", "geospatial", "real estate", "data analysis", "general")
+DOMAIN_TAGS = ["Enterprise Tool Use", "MCP Integrations", "Data & Analytics", "Real Estate & Construction",
+               "Non-profit & Government"]  # LABELS from GET /v2/domains (a slug is refused, 422), max 5
 
 
 def dv(method, path, body=None):
@@ -70,21 +71,23 @@ def main():
         print("skipped:", sorted({s.get("reason") for s in res["skipped"]}), "- waiting 30s for the build")
         time.sleep(30)
 
-    domains = dv("GET", "/domains")
-    names = [d.get("name") or d.get("slug") for d in domains.get("items", domains.get("domains", []))]
-    tags = [n for n in names if n and any(w in n.lower() for w in DOMAIN_WANT)][:3]
-    print("domains on offer:", names, "-> using", tags)
+    tags = DOMAIN_TAGS
 
     by_id = {t["id"]: t for t in map(json.loads, open(os.path.join(ROOT, "tasks", "train.jsonl")))}
-    assets = dv("GET", "/tasks?limit=100").get("items", [])
+    assets, off = [], 0
+    while True:  # 200 per page at most; stop on the server's own total, never on a short page
+        page = dv("GET", f"/tasks?limit=200&offset={off}")
+        assets += page.get("items", [])
+        if not page.get("items") or len(assets) >= page["total"]:
+            break
+        off += len(page["items"])
     done = 0
     for a in assets:
-        slug = (a.get("task") or {}).get("slug") or a.get("title", "")
-        t = by_id.get(slug) or next((v for k, v in by_id.items() if k in json.dumps(a)), None)
+        t = by_id.get(a.get("title", ""))  # an imported task's asset title is its slug, the task id
         if t is None:
             continue
         body = {"description": describe(t), "price_usd": PRICE_USD}
-        body.update({"domain_tags": tags} if tags else {"other_domain": "Public records / geospatial"})
+        body["domain_tags"] = tags
         dv("PATCH", f"/tasks/{a['id']}", body)
         done += 1
     print(f"priced and described {done} of {len(by_id)} train tasks at ${PRICE_USD} each")

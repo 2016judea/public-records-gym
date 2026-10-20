@@ -38,9 +38,10 @@ def test_tools_reject_statements():
     assert "error" in tools.call("query_layer", {"layer": "sales", "where": "price in (select 1)"})
 
 
-def test_25_tasks_split_and_keys_hidden():
+def test_200_plus_tasks_split_and_keys_hidden():
     rows = {s: [json.loads(l) for l in open(f"{ROOT}/tasks/{s}.jsonl")] for s in ("train", "test")}
-    assert len(rows["train"]) + len(rows["test"]) == 25
+    assert len(rows["train"]) + len(rows["test"]) >= 200  # round 4, 2026-10-20: 227
+    assert len({t["id"] for ts in rows.values() for t in ts}) == sum(map(len, rows.values()))
     assert not {t["id"] for t in rows["train"]} & {t["id"] for t in rows["test"]}
     for ts in rows.values():
         for t in ts:

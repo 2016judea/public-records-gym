@@ -34,7 +34,8 @@ def _uploaded():
 def test_image_has_no_test_split_or_generators():
     up = _uploaded()
     for leak in ("tasks/test.jsonl", "answer_keys/test.jsonl", "answer_keys/candidates.jsonl",
-                 "answer_keys/licence_sites.parquet", "gym/build_tasks.py", "gym/templates_hard.py"):
+                 "answer_keys/licence_sites.parquet", "gym/build_tasks.py", "gym/templates_hard.py",
+                 "gym/templates_r4.py"):
         assert leak not in up, leak
     assert not any(p.startswith("outreach/") for p in up)
     for need in ("env.py", "gym/tools.py", "gym/grader.py", "gym/mcp_server.py", "tasks/train.jsonl",
@@ -44,6 +45,7 @@ def test_image_has_no_test_split_or_generators():
 
 def test_task_rows_carry_no_answer():
     from hud_tasks import tasks
-    assert len(tasks) == 15
+    import json
+    assert len(tasks) == sum(1 for _ in open(ROOT / "tasks" / "train.jsonl"))
     for t in tasks:
         assert set(t.args) == {"task_id", "split"}

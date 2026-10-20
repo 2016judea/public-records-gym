@@ -94,10 +94,11 @@ def t_top_sale_near_cleanup(con):
     return out
 
 
-from gym.templates_hard import HARD_TEMPLATES  # noqa: E402
+from gym.templates_r4 import R4_TEMPLATES  # noqa: E402
 
 # round 1's two survivors (sold_above_assessed, top_sale_near_cleanup) retired in round 3: Sonnet 100%
-TEMPLATES = HARD_TEMPLATES
+# round 4 (2026-10-20): round 3's six families over a wider grid, plus sold_above_assessed_count
+TEMPLATES = R4_TEMPLATES
 
 
 def main():
