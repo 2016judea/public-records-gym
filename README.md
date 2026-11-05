@@ -143,7 +143,7 @@ HUD_API_KEY=... uv run python -m scripts.datavendor_list   # deploy, sync, impor
 
 Listing copy for the web app: `datavendor/LISTING.md`.
 
-Rebuild from source (needs `~/Desktop/bricks`): `scripts/build_snapshot.py` →
+Rebuild from source (needs `~/Desktop/workspace/bricks`): `scripts/build_snapshot.py` →
 `gym/build_tasks.py` → `scripts/reference_solutions.py` → `scripts/no_tool_filter.py`
 → `scripts/split.py`. The held-out test keys live in `answer_keys/test.jsonl` and never
 go out with a sample.

@@ -22,7 +22,7 @@ import sys
 
 import duckdb
 
-BRICKS = os.path.expanduser("~/Desktop/bricks")
+BRICKS = os.path.expanduser("~/Desktop/workspace/bricks")
 EXP = f"{BRICKS}/website/api/_data/exports"
 FOOD = f"{BRICKS}/data/cache/licences/mpls_food_violations"
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "snapshot.duckdb")

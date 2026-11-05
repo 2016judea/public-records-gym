@@ -25,7 +25,7 @@ submissions remain available in the web app". So a response is always submitted 
 ## Once signed
 
 ```bash
-K=$(grep '^HUD_API_KEY=' ~/Desktop/bricks/.env | tail -1 | cut -d= -f2)
+K=$(grep '^HUD_API_KEY=' ~/Desktop/workspace/bricks/.env | tail -1 | cut -d= -f2)
 curl -s "https://api.datavendor.ai/v2/opportunities?limit=200" -H "Authorization: Bearer $K"
 ```
 

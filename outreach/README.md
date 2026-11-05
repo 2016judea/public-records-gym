@@ -92,5 +92,5 @@ sign-up, so it's Aidan's call. The bounty form is the one most likely to pay qui
 
 Two train tasks, keys, grader and the tool contract are public at
 https://github.com/2016judea/public-records-gym-sample as the work sample for contract
-applications (ledger: ~/Desktop/career/applications.csv). The test split, snapshot and
+applications (ledger: ~/Desktop/workspace/career/applications.csv). The test split, snapshot and
 templates stay here.
